@@ -1,7 +1,22 @@
 ## Thai ZKT
 
-ZKT Device Integration
+ZKTeco Device Integration
 
 #### License
 
 mit
+
+#### DocType
+
+###### Device
+- Serial Number
+- IP Address
+- Model
+
+###### User
+- User ID
+- Name
+- User Role
+- Face
+- Password
+- Profile Photo
