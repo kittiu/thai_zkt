@@ -8,11 +8,16 @@ mit
 
 #### DocType
 
-###### ZK Device
+###### ZK Terminal
 
 - Serial Number
 - IP Address
 - Model
+- Platform
+- FW Version
+- Push Protocol
+- Push Version
+- Last Activity
 
 ###### ZK User
 
