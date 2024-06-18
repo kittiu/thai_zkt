@@ -17,6 +17,7 @@ mit
 - User ID
 - Name
 - User Role
-- Face
 - Password
 - Profile Photo
+- Face
+- Fingerprint
