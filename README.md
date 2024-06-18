@@ -8,12 +8,14 @@ mit
 
 #### DocType
 
-###### Device
+###### ZK Device
+
 - Serial Number
 - IP Address
 - Model
 
-###### User
+###### ZK User
+
 - User ID
 - Name
 - User Role
