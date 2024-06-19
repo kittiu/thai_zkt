@@ -10,7 +10,7 @@ mit
 
 ##### ZK Terminal
 
-- Serial Number (Freppe "Name")
+- Serial Number (Frappe "Name")
 - Alias
 - IP Address
 - Model
@@ -23,7 +23,7 @@ mit
 
 ##### ZK User
 
-- User ID (Freppe "Name")
+- User ID (Frappe "Name")
 - User Name
 - User Role
 - Password
@@ -55,7 +55,7 @@ mit
 - Read/Write File (Bio Photo)
 
 
-##### Freppe
+##### Frappe
 - Guest URL /iclock
 - ZK Terminal Page
     - Import User
@@ -65,9 +65,9 @@ mit
 - ZK User Page
 
 
-##### zkpush (In case Freppe can't make Guest URL /iclock)
+##### zkpush (In case Frappe can't make Guest URL /iclock)
 
-- Call Freppe CRUD Rest API
+- Call Frappe CRUD Rest API
 
 
 ##### /iclock command
