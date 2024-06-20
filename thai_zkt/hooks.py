@@ -6,6 +6,8 @@ app_email = "kittiu@gmail.com"
 app_license = "mit"
 # required_apps = []
 
+website_path_resolver = "thai_zkt.utils.resolve_path"
+
 # Includes in <head>
 # ------------------
 
