@@ -64,11 +64,12 @@ mit
 ##### /iclock command
 
 - [ ] Get ZK Terminal Info
-- [ ] Get Users from ZK Terminal
-- [ ] Set Users from ZK Terminal
+- [ ] Get Users
+- [ ] Set Users
 - [ ] Get Face Template
 - [ ] Set Face Template
 - [ ] Get Fingerprint Template
 - [ ] Set Fingerprint Template
 - [ ] Get Photo
 - [ ] Set Photo
+- [ ] Get Attendance
