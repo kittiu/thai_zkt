@@ -6,6 +6,11 @@ app_email = "kittiu@gmail.com"
 app_license = "mit"
 # required_apps = []
 
+website_route_rules = [
+	{"from_route": "/iclock", "to_route": "thai_zkt"},
+]
+
+
 # Includes in <head>
 # ------------------
 
