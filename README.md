@@ -50,30 +50,25 @@ mit
 
 #### TODO
 
-##### Common
-
-- Read/Write File (Bio Photo)
-
-
 ##### Frappe
-- Guest URL /iclock
-- ZK Terminal Page
-    - Import User
-    - Export User
-    - Restore User
-    - Log
-- ZK User Page
-
-
-##### zkpush (In case Frappe can't make Guest URL /iclock)
-
-- Call Frappe CRUD Rest API
+- [x] Guest URL /iclock
+- [ ] Read/Write File (Bio Photo)
+- [ ] ZK Terminal Page
+    - [ ] Import User
+    - [ ] Export User
+    - [ ] Restore User
+    - [ ] Log
+- [ ] ZK User Page
 
 
 ##### /iclock command
 
-- Get ZK Terminal Info
-- Get Users from ZK Terminal
-- Get Face Template
-- Get Fingerprint Template
-- Get Photo
+- [ ] Get ZK Terminal Info
+- [ ] Get Users from ZK Terminal
+- [ ] Set Users from ZK Terminal
+- [ ] Get Face Template
+- [ ] Set Face Template
+- [ ] Get Fingerprint Template
+- [ ] Set Fingerprint Template
+- [ ] Get Photo
+- [ ] Set Photo
