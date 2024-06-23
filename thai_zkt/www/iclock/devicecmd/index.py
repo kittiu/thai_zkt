@@ -1,5 +1,5 @@
 import frappe
-from urllib.parse import urlparse, parse_qs
+from urllib.parse import urlsplit
 
 no_cache = 1
 
@@ -8,7 +8,6 @@ def get_context(context):
 	frappe.db.commit()  # nosempgrep
 	context = frappe._dict()
 	context.csrf_token = csrf_token
-
 	request = frappe.local.request
 
 	print("---> request:",request)
@@ -20,22 +19,13 @@ def get_context(context):
 
 	ret_msg = "OK"
 
-	if request.method == 'GET':
-		serialNumber = args.get('SN')
-		info = args.get('INFO')
+	serialNumber = args.get('SN')
+	print("/devicecmd Serial Number:",serialNumber)
 
-		print("Serial Number:",serialNumber)
-		print("Info:",info)
-
-		data = request.get_data(True,True)
-		print("data:",data)
-
-#            return 'C:10:CHECK\n'
-    
-	else:
-		data = request.get_data(True,True)
-		print("data:",data)
+	if request.method == 'POST':
+		ret_msg = "ID=10&Return=0&CMD=CHECK"
 
 	context.ret_msg = ret_msg
 
 	return context
+
