@@ -1,8 +1,10 @@
 import datetime
+import logging
+from logging.handlers import RotatingFileHandler
 import requests
 import json
 import frappe
-from urllib.parse import parse_qs, urlparse, urlsplit
+from urllib.parse import parse_qs, urlparse
 import thai_zkt.www.iclock.local_config as config
 import thai_zkt.www.iclock.utils as utils
 
@@ -66,7 +68,7 @@ def get_context(context):
 		print("data:",data)
 
 		if table == "options":
-			words = data.decode('utf-8').split(",")
+			words = data.split(",")
 			print("words:",words) 
 
             # resolve "~OEMVendor=ZKTECO CO., LTD." (Comma is inside company name)
@@ -111,6 +113,13 @@ def get_context(context):
 
 			device_id = get_device_id(serialNumber)
 
+			print("before setup log")
+			attendance_success_log_file = '_'.join(["attendance_success_log", device_id])
+			attendance_failed_log_file = '_'.join(["attendance_failed_log", device_id])
+			attendance_success_logger = setup_logger(attendance_success_log_file, '/'.join([config.LOGS_DIRECTORY, attendance_success_log_file])+'.log')
+			attendance_failed_logger = setup_logger(attendance_failed_log_file, '/'.join([config.LOGS_DIRECTORY, attendance_failed_log_file])+'.log')
+			print("after setup log")
+
 			for device_attendance_log in logs:
 				print("attendance:",device_attendance_log)
 				punch_direction = None
@@ -120,8 +129,17 @@ def get_context(context):
                         str(device_attendance_log['user_id']), str(device_attendance_log['timestamp'].timestamp()),
                         str(device_attendance_log['punch']), str(device_attendance_log['status']),
                         json.dumps(device_attendance_log, default=str)]))
+					attendance_success_logger.info("\t".join([erpnext_message, str(device_attendance_log['uid']),
+                        str(device_attendance_log['user_id']), str(device_attendance_log['timestamp'].timestamp()),
+                        str(device_attendance_log['punch']), str(device_attendance_log['status']),
+                        json.dumps(device_attendance_log, default=str)]))
+
 				else:
 					print("\t".join([str(erpnext_status_code), str(device_attendance_log['uid']),
+                        str(device_attendance_log['user_id']), str(device_attendance_log['timestamp'].timestamp()),
+                        str(device_attendance_log['punch']), str(device_attendance_log['status']),
+                        json.dumps(device_attendance_log, default=str)]))
+					attendance_failed_logger.error("\t".join([str(erpnext_status_code), str(device_attendance_log['uid']),
                         str(device_attendance_log['user_id']), str(device_attendance_log['timestamp'].timestamp()),
                         str(device_attendance_log['punch']), str(device_attendance_log['status']),
                         json.dumps(device_attendance_log, default=str)]))
@@ -204,3 +222,17 @@ def _safe_get_error_str(res):
     except:
         error_str = str(res.__dict__)
     return error_str
+
+def setup_logger(name, log_file, level=logging.INFO, formatter=None):
+	if not formatter:
+		formatter = logging.Formatter('%(asctime)s\t%(levelname)s\t%(message)s')
+
+	handler = RotatingFileHandler(log_file, maxBytes=10000000, backupCount=50)
+	handler.setFormatter(formatter)
+
+	logger = logging.getLogger(name)
+	logger.setLevel(level)
+	if not logger.hasHandlers():
+		logger.addHandler(handler)
+
+	return logger

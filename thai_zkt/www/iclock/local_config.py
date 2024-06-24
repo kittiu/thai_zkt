@@ -7,7 +7,7 @@ ERPNEXT_VERSION = 15
 
 
 # operational configs
-LOGS_DIRECTORY = 'logs' # logs of this script is stored in this directory
+LOGS_DIRECTORY = '/home/cooper/logs' # logs of this script is stored in this directory
 
 # Biometric device configs (all keys mandatory)
     #- device_id - must be unique, strictly alphanumerical chars only. no space allowed.
