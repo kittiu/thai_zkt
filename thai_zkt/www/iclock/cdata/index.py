@@ -98,7 +98,21 @@ def get_context(context):
 
 			print("logs:",logs)
 
-			device_id = service.get_device_id(serial_number)
+			erpnext_status_code, erpnext_message = service.get_terminal_alias(serial_number)
+			if erpnext_status_code == 200:
+					device_id = erpnext_message
+					print("Alias:",device_id)
+			else:
+					print("\t".join([str(erpnext_status_code), str(device_attendance_log['uid']),
+                        str(device_attendance_log['user_id']), str(device_attendance_log['timestamp'].timestamp()),
+                        str(device_attendance_log['punch']), str(device_attendance_log['status']),
+                        json.dumps(device_attendance_log, default=str)]))
+					attendance_failed_logger.error("\t".join([str(erpnext_status_code), str(device_attendance_log['uid']),
+                        str(device_attendance_log['user_id']), str(device_attendance_log['timestamp'].timestamp()),
+                        str(device_attendance_log['punch']), str(device_attendance_log['status']),
+                        json.dumps(device_attendance_log, default=str)]))
+					if not(any(error in erpnext_message for error in service.allowlisted_errors)):
+						raise Exception('API Call to ERPNext Failed.')
 
 			print("before setup log")
 			attendance_success_log_file = '_'.join(["attendance_success_log", device_id])

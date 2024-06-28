@@ -169,16 +169,31 @@ def create_attendance(employee_field_value, timestamp, device_id=None, log_type=
 			print('\t'.join(['Error during ERPNext API Call.', str(employee_field_value), str(timestamp.timestamp()), str(device_id), str(log_type), error_str]))
 		return response.status_code, error_str
 
-def get_device_id(serial_number):
 
-    result = serial_number
 
-    for device in config.devices:
-        if device['serial_number'] == serial_number:
-            result = device['device_id']
-            break
+def get_terminal_alias(serial_number):
+	"""
+	Example: get_terminal_alias('CBE13422349')
+	"""
+	url = f"{config.ERPNEXT_URL}/api/resource/ZK Terminal/" + serial_number
+	headers = {
+        'Authorization': "token "+ config.ERPNEXT_API_KEY + ":" + config.ERPNEXT_API_SECRET,
+        'Accept': 'application/json'
+	}
+	data = {
+	}
+	response = requests.request("GET", url, headers=headers, json=data)
+	if response.status_code == 200:
+		return 200, json.loads(response._content)['data']['alias']
+	else:
+		error_str = utils.safe_get_error_str(response)
+		if EMPLOYEE_NOT_FOUND_ERROR_MESSAGE in error_str:
+			print('\t'.join(['Error during ERPNext API Call.', str(serial_number), error_str]))
+		else:
+			print('\t'.join(['Error during ERPNext API Call.', str(serial_number), error_str]))
+		return response.status_code, error_str
 
-    return result
+
 
 def setup_logger(name, log_file, level=logging.INFO, formatter=None):
 	if not formatter:
