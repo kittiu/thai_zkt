@@ -1,4 +1,6 @@
 import datetime
+import json
+import thai_zkt.www.iclock.local_config as config
 
 def get_arg(args,key,index=0,default=""):
     return args.get(key)[index] if args.get(key) else default
@@ -21,3 +23,10 @@ def safe_get_error_str(res):
     except:
         error_str = str(res.__dict__)
     return error_str
+
+def get_headers():
+    
+    return {
+        'Authorization': "token "+ config.ERPNEXT_API_KEY + ":" + config.ERPNEXT_API_SECRET,
+        'Accept': 'application/json'
+    }
