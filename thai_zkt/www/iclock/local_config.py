@@ -3,8 +3,6 @@
 ERPNEXT_API_KEY = 'd4033010702172e'
 ERPNEXT_API_SECRET = 'f565902002bf6ee'
 ERPNEXT_URL = 'http://dcode.com:8000'
-ERPNEXT_VERSION = 15
-
 
 # operational configs
 LOGS_DIRECTORY = '/home/cooper/logs' # logs of this script is stored in this directory

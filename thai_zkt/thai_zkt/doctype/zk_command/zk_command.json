@@ -1,0 +1,90 @@
+{
+ "actions": [],
+ "autoname": "autoincrement",
+ "creation": "2024-06-25 04:24:43.827045",
+ "doctype": "DocType",
+ "engine": "InnoDB",
+ "field_order": [
+  "id",
+  "terminal",
+  "terminal_name",
+  "command",
+  "status",
+  "sent_time",
+  "done_time"
+ ],
+ "fields": [
+  {
+   "fieldname": "id",
+   "fieldtype": "Int",
+   "in_list_view": 1,
+   "label": "ID",
+   "reqd": 1
+  },
+  {
+   "fieldname": "terminal",
+   "fieldtype": "Link",
+   "in_list_view": 1,
+   "label": "Terminal",
+   "options": "ZK Terminal",
+   "reqd": 1
+  },
+  {
+   "fetch_from": "terminal.serial_number",
+   "fieldname": "terminal_name",
+   "fieldtype": "Data",
+   "label": "Terminal Name"
+  },
+  {
+   "fieldname": "command",
+   "fieldtype": "Data",
+   "in_list_view": 1,
+   "label": "Command",
+   "reqd": 1
+  },
+  {
+   "default": "Create",
+   "fieldname": "status",
+   "fieldtype": "Data",
+   "in_list_view": 1,
+   "label": "Status",
+   "options": "Create\nSend\nDone",
+   "reqd": 1
+  },
+  {
+   "fieldname": "sent_time",
+   "fieldtype": "Datetime",
+   "label": "Sent Time"
+  },
+  {
+   "fieldname": "done_time",
+   "fieldtype": "Datetime",
+   "label": "Done Time"
+  }
+ ],
+ "index_web_pages_for_search": 1,
+ "links": [],
+ "modified": "2024-06-25 04:52:47.372789",
+ "modified_by": "Administrator",
+ "module": "Thai ZKT",
+ "name": "ZK Command",
+ "naming_rule": "Autoincrement",
+ "owner": "Administrator",
+ "permissions": [
+  {
+   "create": 1,
+   "delete": 1,
+   "email": 1,
+   "export": 1,
+   "print": 1,
+   "read": 1,
+   "report": 1,
+   "role": "System Manager",
+   "share": 1,
+   "write": 1
+  }
+ ],
+ "sort_field": "modified",
+ "sort_order": "DESC",
+ "states": []
+}
