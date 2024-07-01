@@ -1,5 +1,7 @@
 import frappe
-from urllib.parse import urlsplit
+from urllib.parse import urlparse, parse_qs
+import thai_zkt.www.iclock.local_config as config
+import thai_zkt.www.iclock.utils as utils
 
 no_cache = 1
 
@@ -15,8 +17,13 @@ def get_context(context):
 
 	ret_msg = "OK"
 
-	serialNumber = args.get('SN')
-	print("Serial Number:",serialNumber)
+	parsed_url = urlparse(request.url)
+	args = parse_qs(parsed_url.query)
+
+	print("args:",args)
+
+	serial_number = utils.get_arg(args,'SN')
+	print("/ping Serial Number:",serial_number)
 
 	context.ret_msg = ret_msg
 

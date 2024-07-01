@@ -16,7 +16,6 @@ mit
 - Model
 - Platform
 - FW Version
-- Push Protocol
 - Push Version
 - Last Activity
 
@@ -47,23 +46,33 @@ mit
 - Approval Time
 - Enroll Terminal (FK "ZK Terminal")
 
+##### ZK Command
+
+- ID
+- Terminal (FK "ZK Terminal")
+- Terminal Name
+- Command
+- Status
+- Sent Time
+- Done Time
+
 
 #### TODO
 
 ##### Frappe
 - [x] Guest URL /iclock
 - [ ] Read/Write File (Bio Photo)
-- [ ] ZK Terminal Page
+- [X] ZK Terminal Page
     - [ ] Import User
     - [ ] Export User
     - [ ] Restore User
     - [ ] Log
 - [ ] ZK User Page
-
+- [X] ZK Command Page
 
 ##### /iclock command
 
-- [ ] Get ZK Terminal Info
+- [X] Get ZK Terminal Info
 - [ ] Get Users
 - [ ] Set Users
 - [ ] Get Face Template

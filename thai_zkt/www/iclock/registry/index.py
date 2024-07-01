@@ -11,6 +11,7 @@ def get_context(context):
 	frappe.db.commit()  # nosempgrep
 	context = frappe._dict()
 	context.csrf_token = csrf_token
+
 	request = frappe.local.request
 
 	print("---> request:",request)
@@ -23,25 +24,23 @@ def get_context(context):
 	ret_msg = "OK"
 
 	serial_number = utils.get_arg(args,'SN')
-	print("/devicecmd Serial Number:",serial_number)
+	print("/registry Serial Number:",serial_number)
 
 	if request.method == 'POST':
 		data = request.get_data(True,True)
 		print("data:",data)
 
 		# parse 'POST' args and data
-		lines = data.split("\n")
+		lines = data.split(",")
 		#print("lines:",lines)
 		
 		info = {}
+		post_args = None
 
 		for ldx, line in enumerate(lines):
 			if len(line)>0:
-				if (ldx == 0): # first line is args
-					post_args = parse_qs(line)
-				else:
-					words = line.split("=")
-					info[words[0]] = words[1]
+				words = line.split("=")
+				info[words[0]] = words[1]
 
 		print("post_args:", post_args)
 		print("info:", info)
@@ -53,7 +52,3 @@ def get_context(context):
 	print("RETURN:",ret_msg)
 	context.ret_msg = ret_msg
 	return context
-
-
-
-
