@@ -9,7 +9,11 @@ def get_context(context):
 	context = frappe._dict()
 	context.csrf_token = csrf_token
 	context.boot = get_boot()
-	context.ok = "Thai ZKT OK"
+	context.ok = "Thai ZKT"
+
+	request = frappe.local.request
+	print("--->", request.method, request.query_string)
+
 	return context
 
 

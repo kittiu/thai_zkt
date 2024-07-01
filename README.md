@@ -72,4 +72,4 @@ mit
 - [ ] Set Fingerprint Template
 - [ ] Get Photo
 - [ ] Set Photo
-- [ ] Get Attendance
+- [x] Get Attendance
