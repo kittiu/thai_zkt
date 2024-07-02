@@ -22,17 +22,23 @@ mit
 
 ##### ZK User
 
-- User ID (Frappe "Name")
+- ID (Frappe "Name")
 - User Name
-- User Role
 - Password
+- Privilege
+- Group
 
 
 ##### ZK Bio Data
 
+- Frappe "Name"
 - ZK User (FK "ZK User")
-- Template
 - Type
+- No
+- Index
+- Valid
+- Template
+- Format
 - Major Version
 - Minor Version
 
@@ -48,9 +54,9 @@ mit
 
 ##### ZK Command
 
-- ID
+- ID (Frappe "Name")
 - Terminal (FK "ZK Terminal")
-- Terminal Name
+- Terminal Alias
 - Command
 - Status
 - Sent Time
@@ -63,19 +69,19 @@ mit
 - [x] Guest URL /iclock
 - [ ] Read/Write File (Bio Photo)
 - [X] ZK Terminal Page
-    - [ ] Import User
-    - [ ] Export User
-    - [ ] Restore User
+    - [ ] Upload Users to Server
+    - [ ] Download Users to ZK Terminal
+    - [ ] Restore Users to ZK Terminal
     - [ ] Log
-- [ ] ZK User Page
+- [X] ZK User Page
 - [X] ZK Command Page
 
 ##### /iclock command
 
 - [X] Get ZK Terminal Info
-- [ ] Get Users
+- [X] Get Users
 - [ ] Set Users
-- [ ] Get Face Template
+- [X] Get Face Template
 - [ ] Set Face Template
 - [ ] Get Fingerprint Template
 - [ ] Set Fingerprint Template

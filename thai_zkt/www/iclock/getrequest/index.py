@@ -43,7 +43,7 @@ def get_context(context):
 		data = request.get_data(True,True)
 		print("data:",data)
 
-	print("RETURN:",ret_msg)
+	print(">>> RETURN:",ret_msg)
 	context.ret_msg = ret_msg
 	return context
 
@@ -55,22 +55,21 @@ def get_command(serial_number):
 	ret_msg = "OK"
 
 	dt_ZKCommand = frappe.qb.DocType('ZK Command')
-	results = (
+	cmds = (
 		frappe.qb.from_(dt_ZKCommand)
 			.select(dt_ZKCommand.id, dt_ZKCommand.command)
 			.where(dt_ZKCommand.terminal_name == serial_number)
 			.where(dt_ZKCommand.status == "Create")
 	).run(as_dict=True)
 
-	print("cmds:",results)
+	print("cmds:",cmds)
 
 	cmd_id = 0
-	for d_ZKCommand in results:
+	for d_ZKCommand in cmds:
 		cmd_id = d_ZKCommand.id
-		print("ZK Command.id:",cmd_id)
-		print("ZK Command.cmd:",d_ZKCommand.command)
+		print("ZK Command.id:",cmd_id,",",d_ZKCommand.command)
 
-		#TODO set ZK Command status to 'Sent'
+		#set ZK Command status to 'Sent'
 		erpnext_status_code, erpnext_message = service.update_command_status(cmd_id, "Sent")
 		try:
 			if erpnext_status_code == 200:
