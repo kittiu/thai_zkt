@@ -281,14 +281,23 @@ def list_user(search_term = None):
     """
     url = f'{config.ERPNEXT_URL}/api/resource/ZK User?fields=["id","user_name","password","privilege","group"]'
     headers = utils.get_headers()
-    data = {}
+    data = {
+    }
     
     if search_term:
         data['user_name'] = search_term
     
     response = requests.request("GET", url, headers=headers, json=data)
     if response.status_code == 200:
-        return 200, json.loads(response._content)['data']
+        
+        results = []
+        
+        users = json.loads(response._content)['data']
+        for user in users:
+            status,msg = get_user(user["name"])
+            results.append(msg)
+        
+        return 200, results
     else:
         error_str = utils.safe_get_error_str(response)
         if EMPLOYEE_NOT_FOUND_ERROR_MESSAGE in error_str:
@@ -296,7 +305,29 @@ def list_user(search_term = None):
         else:
             print('\t'.join(['Error during ERPNext API Call.', str(search_term), error_str]))
         return response.status_code, error_str
+
     
+def get_user(name):
+    """
+    Example: list_user('CBE13422349')
+    """
+    url = f'{config.ERPNEXT_URL}/api/resource/ZK User/{name}'
+    headers = utils.get_headers()
+    data = {}
+    
+    response = requests.request("GET", url, headers=headers, json=data)
+    if response.status_code == 200:
+        print("response._content",response._content)
+        return 200, json.loads(response._content)['data']
+    else:
+        error_str = utils.safe_get_error_str(response)
+        if EMPLOYEE_NOT_FOUND_ERROR_MESSAGE in error_str:
+            print('\t'.join(['Error during ERPNext API Call.', str(name), error_str]))
+        else:
+            print('\t'.join(['Error during ERPNext API Call.', str(name), error_str]))
+        return response.status_code, error_str
+
+
 
 def create_command(terminal, command, status):
     """

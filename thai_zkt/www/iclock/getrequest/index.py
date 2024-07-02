@@ -111,7 +111,7 @@ def get_special_command(serial_number, cmd_id, cmd):
     
 				for user in users:
 					cmd_line = 'DATA UPDATE USERINFO ' + get_user_info(user)
-					new_cmd_id = service.create_command(serial_number, cmd_line, 'Sent')
+					status, new_cmd_id = service.create_command(serial_number, cmd_line, 'Sent')
 					
 					ret_msg += 'C:' + str(new_cmd_id) + ':' + cmd_line + '\n'
     
@@ -131,7 +131,7 @@ def get_special_command(serial_number, cmd_id, cmd):
 
 def get_user_info(user):
     
-    user_info = "\t".join(["PIN=1" + user["id"]
+    user_info = "\t".join(["PIN=1" + str(user["id"])
                            ,"Name=" + user["user_name"]
                            ,"Pri=" + user["privilege"]
                            ,"Passwd=" + user["password"]
