@@ -49,44 +49,23 @@ def update_command_status(cmd_id, status):
         print('\t'.join(['Error during ERPNext API Call.', str(cmd_id), str(status),  error_str]))
         return response.status_code, error_str
 
-def update_terminal_info(serial_number, post_args, info):
+def update_terminal_info(serial_number, info):
 
     ret_msg = "OK"
 
-    # set ZK Command status to 'Done'
-    if post_args != None: 
-        p_id = utils.get_arg(post_args,'ID')
-        p_ret_code = utils.get_arg(post_args,'Return')
-        p_cmd = utils.get_arg(post_args,'CMD')
-
-        #set ZK Command Status to 'Done'
-        erpnext_status_code, erpnext_message = update_command_status(p_id, "Done")
-        try:
-            if erpnext_status_code == 200:
-                ret_msg = "OK"
-            elif erpnext_status_code == 404:
-                ret_msg = "ERR:Command '" + p_id + "' does not exist!"
-            else:
-                ret_msg = "Err:" + str(erpnext_status_code) + ":" + erpnext_message
-        except frappe.DoesNotExistError:
-            ret_msg = "ERR:Command '" + p_id + "' does not exist!"
-        except Exception as e:
-            logger.exception('ERR:' + str(e))
-            ret_msg = "ERROR"
-
-        erpnext_status_code, erpnext_message = update_terminal_last_activity(serial_number)
-        try:
-            if erpnext_status_code == 200:
-                ret_msg = "OK"
-            elif erpnext_status_code == 404:
-                ret_msg = "ERR:Command '" + serial_number + "' does not exist!"
-            else:
-                ret_msg = "Err:" + str(erpnext_status_code) + ":" + erpnext_message
-        except frappe.DoesNotExistError:
+    erpnext_status_code, erpnext_message = update_terminal_last_activity(serial_number)
+    try:
+        if erpnext_status_code == 200:
+            ret_msg = "OK"
+        elif erpnext_status_code == 404:
             ret_msg = "ERR:Command '" + serial_number + "' does not exist!"
-        except Exception as e:
-            logger.exception('ERR:' + str(e))
-            ret_msg = "ERROR"
+        else:
+            ret_msg = "Err:" + str(erpnext_status_code) + ":" + erpnext_message
+    except frappe.DoesNotExistError:
+        ret_msg = "ERR:Command '" + serial_number + "' does not exist!"
+    except Exception as e:
+        logger.exception('ERR:' + str(e))
+        ret_msg = "ERROR"
 
     if ret_msg == "OK":
         # update ZK Terminal with info
@@ -317,7 +296,6 @@ def get_user(name):
     
     response = requests.request("GET", url, headers=headers, json=data)
     if response.status_code == 200:
-        print("response._content",response._content)
         return 200, json.loads(response._content)['data']
     else:
         error_str = utils.safe_get_error_str(response)

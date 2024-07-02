@@ -103,7 +103,6 @@ def get_special_command(serial_number, cmd_id, cmd):
 		try:
 			if erpnext_status_code == 200:
        
-				print("erpnext_message:", erpnext_message)
 				users = erpnext_message
     
 				if len(users) > 0:

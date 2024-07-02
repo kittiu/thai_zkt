@@ -37,23 +37,39 @@ def get_context(context):
 
 		for ldx, line in enumerate(lines):
 			if len(line)>0:
-				if (ldx == 0): # first line is args
+				if line.startswith("ID"):
 					post_args = parse_qs(line)
+					print(f"post_args {ldx}:", post_args)
+     
+					# update ZK Command Status to 'Done'
+					p_id = utils.get_arg(post_args,'ID')
+					p_ret_code = utils.get_arg(post_args,'Return')
+					p_cmd = utils.get_arg(post_args,'CMD')
+
+					#set ZK Command Status to 'Done'
+					erpnext_status_code, erpnext_message = service.update_command_status(p_id, "Done")
+					try:
+						if erpnext_status_code == 200:
+							ret_msg = "OK"
+						elif erpnext_status_code == 404:
+							ret_msg = "ERR:Command '" + p_id + "' does not exist!"
+						else:
+							ret_msg = "Err:" + str(erpnext_status_code) + ":" + erpnext_message
+					except frappe.DoesNotExistError:
+						ret_msg = "ERR:Command '" + p_id + "' does not exist!"
+					except Exception as e:
+						logger.exception('ERR:' + str(e))
+						ret_msg = "ERROR"
+
 				else:
 					words = line.split("=")
 					info[words[0]] = words[1]
 
-		print("post_args:", post_args)
-		print("info:", info)
-
 		# process args and data
-		ret_msg = service.update_terminal_info(serial_number, post_args, info)
+		print("info:", info)
+		ret_msg = service.update_terminal_info(serial_number, info)
 	
 	# send msg back to terminal
 	print("RETURN:",ret_msg)
 	context.ret_msg = ret_msg
 	return context
-
-
-
-
