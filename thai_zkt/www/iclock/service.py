@@ -59,7 +59,7 @@ def update_terminal_info(serial_number, post_args, info):
         p_ret_code = utils.get_arg(post_args,'Return')
         p_cmd = utils.get_arg(post_args,'CMD')
 
-        #TODO set ZK Command Status to 'Done'
+        #set ZK Command Status to 'Done'
         erpnext_status_code, erpnext_message = update_command_status(p_id, "Done")
         try:
             if erpnext_status_code == 200:
@@ -272,4 +272,52 @@ def create_bio_data(zk_user, type, no, index, valid, format, major_version, mino
     else:
         error_str = utils.safe_get_error_str(response)
         print('\t'.join(['Error during ERPNext API Call.', str(zk_user), str(type), str(no), str(index),  error_str]))
+        return response.status_code, error_str
+    
+    
+def list_user(search_term = None):
+    """
+    Example: list_user('CBE13422349')
+    """
+    url = f'{config.ERPNEXT_URL}/api/resource/ZK User?fields=["id","user_name","password","privilege","group"]'
+    headers = utils.get_headers()
+    data = {}
+    
+    if search_term:
+        data['user_name'] = search_term
+    
+    response = requests.request("GET", url, headers=headers, json=data)
+    if response.status_code == 200:
+        return 200, json.loads(response._content)['data']
+    else:
+        error_str = utils.safe_get_error_str(response)
+        if EMPLOYEE_NOT_FOUND_ERROR_MESSAGE in error_str:
+            print('\t'.join(['Error during ERPNext API Call.', str(search_term), error_str]))
+        else:
+            print('\t'.join(['Error during ERPNext API Call.', str(search_term), error_str]))
+        return response.status_code, error_str
+    
+
+def create_command(terminal, command, status):
+    """
+    Example: create_command(1,'CSE33412349', 'UPDATE USERINFO', 'Sent')
+    """
+    url = f"{config.ERPNEXT_URL}/api/resource/ZK Command"
+    headers = utils.get_headers()
+
+    data = {
+        'terminal' : terminal,
+        'command' : command,
+        'status' : status
+	}
+    
+    response = requests.request("POST", url, headers=headers, json=data)
+    if response.status_code == 200:
+        return 200, json.loads(response._content)['data']['name']
+    else:
+        error_str = utils.safe_get_error_str(response)
+        if EMPLOYEE_NOT_FOUND_ERROR_MESSAGE in error_str:
+            print('\t'.join(['Error during ERPNext API Call.', str(id), str(terminal), str(command), str(status), error_str]))
+        else:
+            print('\t'.join(['Error during ERPNext API Call.', str(id), str(terminal), str(command), str(status), error_str]))
         return response.status_code, error_str

@@ -54,7 +54,7 @@ mit
 
 ##### ZK Command
 
-- ID (Frappe "Name")
+- Frappe "Name"
 - Terminal (FK "ZK Terminal")
 - Terminal Alias
 - Command

@@ -183,7 +183,7 @@ def get_context(context):
 					user_pri = kv[1]
 					kv = words[3].split("=")
 					user_password = kv[1]
-					kv = words[4].split("=")
+					kv = words[5].split("=")
 					user_grp = kv[1]
      
 					erpnext_status_code, erpnext_message = service.create_user(user_id, user_name, user_pri, user_password, user_grp)
