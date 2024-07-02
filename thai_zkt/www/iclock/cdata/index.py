@@ -3,6 +3,8 @@ from urllib.parse import parse_qs, urlparse
 import thai_zkt.www.iclock.local_config as config
 import thai_zkt.www.iclock.utils as utils
 import thai_zkt.www.iclock.service as service
+import thai_zkt.www.iclock.push_protocol_2 as push2
+import thai_zkt.www.iclock.push_protocol_3 as push3
 import json
 
 no_cache = 1
@@ -27,6 +29,8 @@ def get_context(context):
 	ret_msg = "OK"
 	serial_number = utils.get_arg(args,'SN')
 	print("Serial Number:",serial_number)
+
+
      
 	if request.method == 'GET':
 		options = utils.get_arg(args,'options')
@@ -41,8 +45,15 @@ def get_context(context):
 
 		data = request.get_data(True,True)
 		print("data:",data)
+  
+		if pushver.startswith("2"):
+			ret_msg = push2.handle_cdata_get(args)
+		else:
+			ret_msg = push3.handle_cdata_get(args)
 
-	else:
+
+
+	else: # request.method == "POST"
 		table = utils.get_arg(args,'table')
 		stamp = utils.get_arg(args,'Stamp')
 		opstamp = utils.get_arg(args,'OpStamp')
@@ -71,6 +82,9 @@ def get_context(context):
 
 			for word in finalwords:
 				print("  -",word)
+
+
+
 
 		elif table == "ATTLOG":
 			lines = data.split("\n")
@@ -146,20 +160,81 @@ def get_context(context):
                         json.dumps(device_attendance_log, default=str)]))
 					if not(any(error in erpnext_message for error in service.allowlisted_errors)):
 						raise Exception('API Call to ERPNext Failed.')
+  
+  
+  
 		elif table == "OPERLOG":
-			data = request.get_data(True,True)
-			print("data:",data)
 
 			lines = data.split("\n")
 			print("lines:",lines)
 
+			user_cnt = 0
+   
 			for line in lines:
 				words = line.split("\t")
 				print("words:",words)
 
+				if words[0].startswith("USER PIN"):
+					kv = words[0].split("=")
+					user_id = kv[1]
+					kv = words[1].split("=")
+					user_name = kv[1]
+					kv = words[2].split("=")
+					user_pri = kv[1]
+					kv = words[3].split("=")
+					user_password = kv[1]
+					kv = words[4].split("=")
+					user_grp = kv[1]
+     
+					erpnext_status_code, erpnext_message = service.create_user(user_id, user_name, user_pri, user_password, user_grp)
+					if erpnext_status_code == 200:
+						user_cnt += 1
+
+			if user_cnt > 0:
+				ret_msg = "OK:" + str(user_cnt)
+
+
+
+
+		elif table == "BIODATA":
+
+			lines = data.split("\n")
+			print("lines:",lines)
+
+			template_cnt = 0
+   
+			for line in lines:
+				words = line.split("\t")
+				print("words:",words)
+				kv = words[0].split("=")
+				zk_user = kv[1]
+				kv = words[1].split("=")
+				no = kv[1]
+				kv = words[2].split("=")
+				index = kv[1]
+				kv = words[3].split("=")
+				valid = kv[1]
+				kv = words[5].split("=")
+				type = kv[1]
+				kv = words[6].split("=")
+				major_version = kv[1]
+				kv = words[7].split("=")
+				minor_version = kv[1]
+				kv = words[8].split("=")
+				format = kv[1]
+				kv = words[9].split("=")
+				template = kv[1]
+
+				erpnext_status_code, erpnext_message = service.create_bio_data(zk_user, type, no, index, valid, format, major_version, minor_version, template)
+				if erpnext_status_code == 200:
+					template_cnt += 1
+
+			if template_cnt > 0:
+				ret_msg = "OK:" + str(template_cnt)
+
+
+      
 		else:
-			data = request.get_data(True,True)
-			print("data:",data)
 
 			lines = data.split("\n")
 			print("lines:",lines)
@@ -167,6 +242,8 @@ def get_context(context):
 			for line in lines:
 				words = line.split("\t")
 				print("words:",words)
+
+
 
 	print("RETURN:",ret_msg)
 	context.ret_msg = ret_msg

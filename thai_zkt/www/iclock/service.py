@@ -115,11 +115,17 @@ def save_terminal(serial_number, info):
 
     data = {
         'fw_version' : info.get('FWVersion',info.get('FirmVer',"")),
-        'ip_address' : info['IPAddress'],
-        'model' : info['~DeviceName'],
-        'platform' : info.get('~Platform',""),
-        'push_version' : info['PushVersion']
+        'platform' : info.get('~Platform',"")
 	}
+    
+    if info.get('IPAddress') != None:
+        data['ip_address'] = info['IPAddress']
+        
+    if info.get('~DeviceName') != None:
+        data['model'] = info['~DeviceName']
+
+    if info.get('PushVersion') != None:
+        data['push_version'] = info['PushVersion']
 
     response = requests.request("PUT", url, headers=headers, json=data)
     if response.status_code == 200:
@@ -213,4 +219,57 @@ def update_terminal_last_activity(serial_number):
     else:
         error_str = utils.safe_get_error_str(response)
         print('\t'.join(['Error during ERPNext API Call.', str(serial_number), now.__str__,  error_str]))
+        return response.status_code, error_str
+    
+def create_user(user_id, user_name, user_pri, user_password, user_grp):
+    """
+    Example: create_user('1','Roger Power', '1', 'abc', '1')
+    """
+    url = f"{config.ERPNEXT_URL}/api/resource/ZK User"
+    headers = utils.get_headers()
+
+    data = {
+        'id' : user_id,
+        'user_name' : user_name,
+        'password' : user_password,
+        'privilege' : user_pri,
+        'group' : user_grp
+	}
+    
+    response = requests.request("POST", url, headers=headers, json=data)
+    if response.status_code == 200:
+        print("response.content",response._content)
+        return 200, json.loads(response._content)['data']['id']
+    else:
+        error_str = utils.safe_get_error_str(response)
+        print('\t'.join(['Error during ERPNext API Call.', str(id), str(user_name),  error_str]))
+        return response.status_code, error_str
+    
+    
+def create_bio_data(zk_user, type, no, index, valid, format, major_version, minor_version, template):
+    """
+    Example: create_bio_data('CCK24212349', info)
+    """
+    url = f"{config.ERPNEXT_URL}/api/resource/ZK Bio Data"
+    headers = utils.get_headers()
+
+    data = {
+        'zk_user' : zk_user,
+        'type' : type,
+        'no' : no,
+        'index' : index,
+        'valid' : valid,
+        'format' : format,
+        'major_version' : major_version,
+        'minor_version' : minor_version,
+        'template' : template
+	}
+    
+    response = requests.request("POST", url, headers=headers, json=data)
+    if response.status_code == 200:
+        print("response.content",response._content)
+        return 200, json.loads(response._content)['data']['name']
+    else:
+        error_str = utils.safe_get_error_str(response)
+        print('\t'.join(['Error during ERPNext API Call.', str(zk_user), str(type), str(no), str(index),  error_str]))
         return response.status_code, error_str

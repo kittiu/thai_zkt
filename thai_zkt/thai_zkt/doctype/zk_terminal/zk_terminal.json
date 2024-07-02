@@ -28,7 +28,8 @@
   {
    "fieldname": "alias",
    "fieldtype": "Data",
-   "label": "Alias"
+   "label": "Alias",
+   "reqd": 1
   },
   {
    "fieldname": "ip_address",
@@ -63,7 +64,7 @@
  ],
  "index_web_pages_for_search": 1,
  "links": [],
- "modified": "2024-06-26 05:09:16.468833",
+ "modified": "2024-07-02 06:04:07.345472",
  "modified_by": "Administrator",
  "module": "Thai ZKT",
  "name": "ZK Terminal",
