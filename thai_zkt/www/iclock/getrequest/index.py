@@ -49,31 +49,33 @@ def get_context(context):
 
 
 def get_command(serial_number):
-	# return 'C:10:CHECK\n'
-	# return 'C:10:INFO\n'
 
 	ret_msg = "OK"
 
 	dt_ZKCommand = frappe.qb.DocType('ZK Command')
 	cmds = (
 		frappe.qb.from_(dt_ZKCommand)
-			.select(dt_ZKCommand.id, dt_ZKCommand.command)
-			.where(dt_ZKCommand.terminal_name == serial_number)
+			.select(dt_ZKCommand.name, dt_ZKCommand.command)
+			.where(dt_ZKCommand.terminal == serial_number)
 			.where(dt_ZKCommand.status == "Create")
 	).run(as_dict=True)
 
 	print("cmds:",cmds)
 
-	cmd_id = 0
+	cmd_id = None
 	for d_ZKCommand in cmds:
-		cmd_id = d_ZKCommand.id
+		cmd_id = d_ZKCommand.name
 		print("ZK Command.id:",cmd_id,",",d_ZKCommand.command)
+  
+		if d_ZKCommand.command.startswith("_"):
+			ret_msg = get_special_command(serial_number, cmd_id, d_ZKCommand.command)
 
 		#set ZK Command status to 'Sent'
 		erpnext_status_code, erpnext_message = service.update_command_status(cmd_id, "Sent")
 		try:
 			if erpnext_status_code == 200:
-				ret_msg = 'C:' + str(cmd_id) + ':' + d_ZKCommand.command + '\n'
+				if ret_msg=="OK":
+					ret_msg = 'C:' + str(cmd_id) + ':' + d_ZKCommand.command + '\n'
 			elif erpnext_status_code == 404:
 				ret_msg = "ERR:Command '" + cmd_id + "' does not exist!"
 			else:
@@ -85,3 +87,58 @@ def get_command(serial_number):
 			ret_msg = "ERROR"
 
 	return ret_msg
+
+
+def get_special_command(serial_number, cmd_id, cmd):
+    
+	ret_msg = "OK"
+    
+	if cmd == "_UPDATE":
+		# loop ZK User
+		#   create new command 'UPDATE USERINFO'
+		#   if exists ZK Bio Data
+		#     create new command 'UPDATE BIODATA'
+  
+		erpnext_status_code, erpnext_message = service.list_user()
+		try:
+			if erpnext_status_code == 200:
+       
+				print("erpnext_message:", erpnext_message)
+				users = erpnext_message
+    
+				if len(users) > 0:
+					ret_msg = ""
+    
+				for user in users:
+					cmd_line = 'DATA UPDATE USERINFO ' + get_user_info(user)
+					new_cmd_id = service.create_command(serial_number, cmd_line, 'Sent')
+					
+					ret_msg += 'C:' + str(new_cmd_id) + ':' + cmd_line + '\n'
+    
+			elif erpnext_status_code == 404:
+				ret_msg = "ERR:ZK User '" + cmd_id + "' does not exist!"
+			else:
+				ret_msg = "Err:" + str(erpnext_status_code) + ":" + erpnext_message
+		except frappe.DoesNotExistError:
+			ret_msg = "ERR:ZK User '" + cmd_id + "' does not exist!"
+		except Exception as e:
+			logger.exception('ERR:' + str(e))
+			ret_msg = "ERROR"
+    
+	return ret_msg
+
+
+
+def get_user_info(user):
+    
+    user_info = "\t".join(["PIN=1" + user["id"]
+                           ,"Name=" + user["user_name"]
+                           ,"Pri=" + user["privilege"]
+                           ,"Passwd=" + user["password"]
+                           ,"Card="
+                           ,""
+                           ,"Grp=" + user["group"]
+                           ,"Verify=0"
+                           ])
+    
+    return user_info

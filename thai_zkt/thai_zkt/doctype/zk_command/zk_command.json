@@ -18,8 +18,7 @@
    "fieldname": "id",
    "fieldtype": "Int",
    "in_list_view": 1,
-   "label": "ID",
-   "reqd": 1
+   "label": "ID"
   },
   {
    "fieldname": "terminal",
@@ -64,7 +63,7 @@
  ],
  "index_web_pages_for_search": 1,
  "links": [],
- "modified": "2024-07-02 06:03:11.690254",
+ "modified": "2024-07-02 20:35:46.042301",
  "modified_by": "Administrator",
  "module": "Thai ZKT",
  "name": "ZK Command",
