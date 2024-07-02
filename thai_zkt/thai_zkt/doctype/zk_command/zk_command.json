@@ -7,7 +7,7 @@
  "field_order": [
   "id",
   "terminal",
-  "terminal_name",
+  "terminal_alias",
   "command",
   "status",
   "sent_time",
@@ -28,12 +28,6 @@
    "label": "Terminal",
    "options": "ZK Terminal",
    "reqd": 1
-  },
-  {
-   "fetch_from": "terminal.serial_number",
-   "fieldname": "terminal_name",
-   "fieldtype": "Data",
-   "label": "Terminal Name"
   },
   {
    "fieldname": "command",
@@ -60,11 +54,17 @@
    "fieldname": "done_time",
    "fieldtype": "Datetime",
    "label": "Done Time"
+  },
+  {
+   "fetch_from": "terminal.alias",
+   "fieldname": "terminal_alias",
+   "fieldtype": "Data",
+   "label": "Terminal Alias"
   }
  ],
  "index_web_pages_for_search": 1,
  "links": [],
- "modified": "2024-06-25 04:52:47.372789",
+ "modified": "2024-07-02 06:03:11.690254",
  "modified_by": "Administrator",
  "module": "Thai ZKT",
  "name": "ZK Command",

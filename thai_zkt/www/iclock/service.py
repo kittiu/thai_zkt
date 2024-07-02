@@ -24,10 +24,7 @@ def update_command_status(cmd_id, status):
     Example: update_command_status(1, "Sent")
     """
     url = f"{config.ERPNEXT_URL}/api/resource/ZK Command/{cmd_id}"
-    headers = {
-        'Authorization': "token "+ config.ERPNEXT_API_KEY + ":" + config.ERPNEXT_API_SECRET,
-        'Accept': 'application/json'
-    }
+    headers = utils.get_headers()
 
     data = {
         'status' : status
@@ -49,9 +46,6 @@ def update_command_status(cmd_id, status):
         return 200, json.loads(response._content)['data']['name']
     else:
         error_str = utils.safe_get_error_str(response)
-        #if EMPLOYEE_NOT_FOUND_ERROR_MESSAGE in error_str:
-        #	print('\t'.join(['Error during ERPNext API Call.', str(serial_number), str(info),  error_str]))
-        #else:
         print('\t'.join(['Error during ERPNext API Call.', str(cmd_id), str(status),  error_str]))
         return response.status_code, error_str
 
@@ -117,18 +111,21 @@ def save_terminal(serial_number, info):
     Example: save_terminal('CCK24212349', info)
     """
     url = f"{config.ERPNEXT_URL}/api/resource/ZK Terminal/" + serial_number
-    headers = {
-        'Authorization': "token "+ config.ERPNEXT_API_KEY + ":" + config.ERPNEXT_API_SECRET,
-        'Accept': 'application/json'
-    }
+    headers = utils.get_headers()
 
     data = {
         'fw_version' : info.get('FWVersion',info.get('FirmVer',"")),
-        'ip_address' : info['IPAddress'],
-        'model' : info['~DeviceName'],
-        'platform' : info.get('~Platform',""),
-        'push_version' : info['PushVersion']
+        'platform' : info.get('~Platform',"")
 	}
+    
+    if info.get('IPAddress') != None:
+        data['ip_address'] = info['IPAddress']
+        
+    if info.get('~DeviceName') != None:
+        data['model'] = info['~DeviceName']
+
+    if info.get('PushVersion') != None:
+        data['push_version'] = info['PushVersion']
 
     response = requests.request("PUT", url, headers=headers, json=data)
     if response.status_code == 200:
@@ -136,49 +133,56 @@ def save_terminal(serial_number, info):
         return 200, json.loads(response._content)['data']['name']
     else:
         error_str = utils.safe_get_error_str(response)
-        #if EMPLOYEE_NOT_FOUND_ERROR_MESSAGE in error_str:
-        #	print('\t'.join(['Error during ERPNext API Call.', str(serial_number), str(info),  error_str]))
-        #else:
         print('\t'.join(['Error during ERPNext API Call.', str(serial_number), str(info),  error_str]))
         return response.status_code, error_str
 
 
 def create_attendance(employee_field_value, timestamp, device_id=None, log_type=None):
-	"""
-	Example: create_attendance('12349',datetime.datetime.now(),'HO1','IN')
-	"""
-	url = f"{config.ERPNEXT_URL}/api/method/hrms.hr.doctype.employee_checkin.employee_checkin.add_log_based_on_employee_field"
-	headers = {
-        'Authorization': "token "+ config.ERPNEXT_API_KEY + ":" + config.ERPNEXT_API_SECRET,
-        'Accept': 'application/json'
-	}
-	data = {
-        'employee_field_value' : employee_field_value,
+    """
+    Example: create_attendance('12349',datetime.datetime.now(),'HO1','IN')
+    """
+    url = f"{config.ERPNEXT_URL}/api/method/hrms.hr.doctype.employee_checkin.employee_checkin.add_log_based_on_employee_field"
+    headers = utils.get_headers()
+
+    data = {
+    'employee_field_value' : employee_field_value,
         'timestamp' : timestamp.__str__(),
         'device_id' : device_id,
 		'log_type' : log_type
-	}
-	response = requests.request("POST", url, headers=headers, json=data)
-	if response.status_code == 200:
-		return 200, json.loads(response._content)['message']['name']
-	else:
-		error_str = utils.safe_get_error_str(response)
-		if EMPLOYEE_NOT_FOUND_ERROR_MESSAGE in error_str:
-			print('\t'.join(['Error during ERPNext API Call.', str(employee_field_value), str(timestamp.timestamp()), str(device_id), str(log_type), error_str]))
-		else:
-			print('\t'.join(['Error during ERPNext API Call.', str(employee_field_value), str(timestamp.timestamp()), str(device_id), str(log_type), error_str]))
-		return response.status_code, error_str
+    }
+    response = requests.request("POST", url, headers=headers, json=data)
+    if response.status_code == 200:
+        return 200, json.loads(response._content)['message']['name']
+    else:
+        error_str = utils.safe_get_error_str(response)
+        if EMPLOYEE_NOT_FOUND_ERROR_MESSAGE in error_str:
+            print('\t'.join(['Error during ERPNext API Call.', str(employee_field_value), str(timestamp.timestamp()), str(device_id), str(log_type), error_str]))
+        else:
+            print('\t'.join(['Error during ERPNext API Call.', str(employee_field_value), str(timestamp.timestamp()), str(device_id), str(log_type), error_str]))
+        return response.status_code, error_str
 
-def get_device_id(serial_number):
 
-    result = serial_number
 
-    for device in config.devices:
-        if device['serial_number'] == serial_number:
-            result = device['device_id']
-            break
+def get_terminal_alias(serial_number):
+    """
+    Example: get_terminal_alias('CBE13422349')
+    """
+    url = f"{config.ERPNEXT_URL}/api/resource/ZK Terminal/" + serial_number
+    headers = utils.get_headers()
+    data = {
+    }
+    response = requests.request("GET", url, headers=headers, json=data)
+    if response.status_code == 200:
+        return 200, json.loads(response._content)['data']['alias']
+    else:
+        error_str = utils.safe_get_error_str(response)
+        if EMPLOYEE_NOT_FOUND_ERROR_MESSAGE in error_str:
+            print('\t'.join(['Error during ERPNext API Call.', str(serial_number), error_str]))
+        else:
+            print('\t'.join(['Error during ERPNext API Call.', str(serial_number), error_str]))
+        return response.status_code, error_str
 
-    return result
+
 
 def setup_logger(name, log_file, level=logging.INFO, formatter=None):
 	if not formatter:
@@ -200,10 +204,7 @@ def update_terminal_last_activity(serial_number):
     Example: update_terminal_last_activity('CCK24212349')
     """
     url = f"{config.ERPNEXT_URL}/api/resource/ZK Terminal/" + serial_number
-    headers = {
-        'Authorization': "token "+ config.ERPNEXT_API_KEY + ":" + config.ERPNEXT_API_SECRET,
-        'Accept': 'application/json'
-    }
+    headers = utils.get_headers()
 
     now = datetime.datetime.now()
 
@@ -217,8 +218,58 @@ def update_terminal_last_activity(serial_number):
         return 200, json.loads(response._content)['data']['name']
     else:
         error_str = utils.safe_get_error_str(response)
-        #if EMPLOYEE_NOT_FOUND_ERROR_MESSAGE in error_str:
-        #	print('\t'.join(['Error during ERPNext API Call.', str(serial_number), str(info),  error_str]))
-        #else:
         print('\t'.join(['Error during ERPNext API Call.', str(serial_number), now.__str__,  error_str]))
+        return response.status_code, error_str
+    
+def create_user(user_id, user_name, user_pri, user_password, user_grp):
+    """
+    Example: create_user('1','Roger Power', '1', 'abc', '1')
+    """
+    url = f"{config.ERPNEXT_URL}/api/resource/ZK User"
+    headers = utils.get_headers()
+
+    data = {
+        'id' : user_id,
+        'user_name' : user_name,
+        'password' : user_password,
+        'privilege' : user_pri,
+        'group' : user_grp
+	}
+    
+    response = requests.request("POST", url, headers=headers, json=data)
+    if response.status_code == 200:
+        print("response.content",response._content)
+        return 200, json.loads(response._content)['data']['id']
+    else:
+        error_str = utils.safe_get_error_str(response)
+        print('\t'.join(['Error during ERPNext API Call.', str(id), str(user_name),  error_str]))
+        return response.status_code, error_str
+    
+    
+def create_bio_data(zk_user, type, no, index, valid, format, major_version, minor_version, template):
+    """
+    Example: create_bio_data('CCK24212349', info)
+    """
+    url = f"{config.ERPNEXT_URL}/api/resource/ZK Bio Data"
+    headers = utils.get_headers()
+
+    data = {
+        'zk_user' : zk_user,
+        'type' : type,
+        'no' : no,
+        'index' : index,
+        'valid' : valid,
+        'format' : format,
+        'major_version' : major_version,
+        'minor_version' : minor_version,
+        'template' : template
+	}
+    
+    response = requests.request("POST", url, headers=headers, json=data)
+    if response.status_code == 200:
+        print("response.content",response._content)
+        return 200, json.loads(response._content)['data']['name']
+    else:
+        error_str = utils.safe_get_error_str(response)
+        print('\t'.join(['Error during ERPNext API Call.', str(zk_user), str(type), str(no), str(index),  error_str]))
         return response.status_code, error_str

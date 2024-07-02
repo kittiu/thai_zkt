@@ -1,0 +1,99 @@
+{
+ "actions": [],
+ "autoname": "autoincrement",
+ "creation": "2024-07-02 05:02:17.380606",
+ "doctype": "DocType",
+ "engine": "InnoDB",
+ "field_order": [
+  "zk_user",
+  "type",
+  "no",
+  "index",
+  "valid",
+  "format",
+  "major_version",
+  "minor_version",
+  "template"
+ ],
+ "fields": [
+  {
+   "fieldname": "zk_user",
+   "fieldtype": "Link",
+   "in_list_view": 1,
+   "label": "ZK User",
+   "options": "ZK User",
+   "reqd": 1
+  },
+  {
+   "fieldname": "type",
+   "fieldtype": "Int",
+   "in_list_view": 1,
+   "label": "Type",
+   "reqd": 1
+  },
+  {
+   "fieldname": "no",
+   "fieldtype": "Int",
+   "in_list_view": 1,
+   "label": "no",
+   "reqd": 1
+  },
+  {
+   "fieldname": "index",
+   "fieldtype": "Int",
+   "label": "Index",
+   "reqd": 1
+  },
+  {
+   "fieldname": "valid",
+   "fieldtype": "Int",
+   "label": "Valid"
+  },
+  {
+   "fieldname": "format",
+   "fieldtype": "Int",
+   "label": "Format"
+  },
+  {
+   "fieldname": "major_version",
+   "fieldtype": "Data",
+   "label": "Major Version"
+  },
+  {
+   "fieldname": "minor_version",
+   "fieldtype": "Data",
+   "label": "Minor Version"
+  },
+  {
+   "fieldname": "template",
+   "fieldtype": "Long Text",
+   "label": "Template",
+   "reqd": 1
+  }
+ ],
+ "index_web_pages_for_search": 1,
+ "links": [],
+ "modified": "2024-07-02 05:53:48.124685",
+ "modified_by": "Administrator",
+ "module": "Thai ZKT",
+ "name": "ZK Bio Data",
+ "naming_rule": "Autoincrement",
+ "owner": "Administrator",
+ "permissions": [
+  {
+   "create": 1,
+   "delete": 1,
+   "email": 1,
+   "export": 1,
+   "print": 1,
+   "read": 1,
+   "report": 1,
+   "role": "System Manager",
+   "share": 1,
+   "write": 1
+  }
+ ],
+ "sort_field": "modified",
+ "sort_order": "DESC",
+ "states": []
+}
