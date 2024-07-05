@@ -99,8 +99,8 @@ def get_special_command(serial_number, cmd_id, cmd):
 		#   if exists ZK Bio Data
 		#     create new command 'UPDATE BIODATA'
   
-		erpnext_status_code, erpnext_message = service.list_user()
 		try:
+			erpnext_status_code, erpnext_message = service.list_user()
 			if erpnext_status_code == 200:
        
 				users = erpnext_message
@@ -113,13 +113,36 @@ def get_special_command(serial_number, cmd_id, cmd):
 					status, new_cmd_id = service.create_command(serial_number, cmd_line, 'Sent')
 					
 					ret_msg += 'C:' + str(new_cmd_id) + ':' + cmd_line + '\n'
+     
+					#TODO create UPDATE BIODATA msg
+					try:
+						erpnext_status_code, erpnext_message = service.list_biodata(user["id"])
+						if erpnext_status_code == 200:
+				
+							biodata = erpnext_message
+				
+							for data in biodata:
+								cmd_line = 'DATA UPDATE BIODATA ' + get_biodata_info(data)
+								status, new_cmd_id = service.create_command(serial_number, cmd_line, 'Sent')
+								
+								ret_msg += 'C:' + str(new_cmd_id) + ':' + cmd_line + '\n'
+				
+						elif erpnext_status_code == 404:
+							ret_msg = "ERR:ZK Bio Data of User '" + user["id"] + "' does not exist!"
+						else:
+							ret_msg = "Err:" + str(erpnext_status_code) + ":" + erpnext_message
+					except frappe.DoesNotExistError:
+						ret_msg = "ERR:ZK Bio Data of User '" + user["id"] + "' does not exist!"
+					except Exception as e:
+						logger.exception('ERR:' + str(e))
+						ret_msg = "ERROR"
     
 			elif erpnext_status_code == 404:
-				ret_msg = "ERR:ZK User '" + cmd_id + "' does not exist!"
+				ret_msg = "ERR:ZK User does not exist!"
 			else:
 				ret_msg = "Err:" + str(erpnext_status_code) + ":" + erpnext_message
 		except frappe.DoesNotExistError:
-			ret_msg = "ERR:ZK User '" + cmd_id + "' does not exist!"
+			ret_msg = "ERR:ZK User does not exist!"
 		except Exception as e:
 			logger.exception('ERR:' + str(e))
 			ret_msg = "ERROR"
@@ -130,7 +153,7 @@ def get_special_command(serial_number, cmd_id, cmd):
 
 def get_user_info(user):
     
-    user_info = "\t".join(["PIN=1" + str(user["id"])
+    user_info = "\t".join(["PIN=" + str(user["id"])
                            ,"Name=" + user["user_name"]
                            ,"Pri=" + user["privilege"]
                            ,"Passwd=" + user["password"]
@@ -141,3 +164,18 @@ def get_user_info(user):
                            ])
     
     return user_info
+
+def get_biodata_info(biodata):
+	
+	biodata_info = "\t".join(["Pin=" + str(biodata["zk_user"])
+                           ,"No=" + str(biodata["no"])
+                           ,"Index="+ str(biodata["index"])
+                           ,"Valid="+ str(biodata["valid"])
+                           ,"Duress=0"
+                           ,"Type="+ str(biodata["type"])
+                           ,"MajorVer=" + biodata["major_version"]
+                           ,"MinorVer=" + biodata["minor_version"]
+                           ,"Tmp="+biodata["template"]
+                           ])
+
+	return biodata_info

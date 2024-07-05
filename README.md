@@ -80,11 +80,10 @@ mit
 
 - [X] Get ZK Terminal Info
 - [X] Get Users
-- [ ] Set Users
+- [ ] Clear Users
+- [X] Set Users
 - [X] Get Face Template
-- [ ] Set Face Template
+- [X] Set Face Template
 - [ ] Get Fingerprint Template
 - [ ] Set Fingerprint Template
-- [ ] Get Photo
-- [ ] Set Photo
 - [x] Get Attendance

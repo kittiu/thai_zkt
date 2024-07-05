@@ -30,7 +30,7 @@
   },
   {
    "fieldname": "command",
-   "fieldtype": "Data",
+   "fieldtype": "Long Text",
    "in_list_view": 1,
    "label": "Command",
    "reqd": 1
@@ -63,7 +63,7 @@
  ],
  "index_web_pages_for_search": 1,
  "links": [],
- "modified": "2024-07-02 20:35:46.042301",
+ "modified": "2024-07-04 12:53:47.459974",
  "modified_by": "Administrator",
  "module": "Thai ZKT",
  "name": "ZK Command",

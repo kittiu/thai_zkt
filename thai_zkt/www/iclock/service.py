@@ -7,6 +7,7 @@ import json
 import logging
 import datetime
 from logging.handlers import RotatingFileHandler
+from urllib.parse import urlparse, parse_qs, urlencode
 
 EMPLOYEE_NOT_FOUND_ERROR_MESSAGE = "No Employee found for the given employee field value"
 EMPLOYEE_INACTIVE_ERROR_MESSAGE = "Transactions cannot be created for an Inactive Employee"
@@ -247,6 +248,7 @@ def create_bio_data(zk_user, type, no, index, valid, format, major_version, mino
     response = requests.request("POST", url, headers=headers, json=data)
     if response.status_code == 200:
         print("response.content",response._content)
+
         return 200, json.loads(response._content)['data']['name']
     else:
         error_str = utils.safe_get_error_str(response)
@@ -258,25 +260,17 @@ def list_user(search_term = None):
     """
     Example: list_user('CBE13422349')
     """
-    url = f'{config.ERPNEXT_URL}/api/resource/ZK User?fields=["id","user_name","password","privilege","group"]'
+    fields = 'fields=["id","user_name","password","privilege","group"]'
+    url = f'{config.ERPNEXT_URL}/api/resource/ZK User?{fields}'
     headers = utils.get_headers()
-    data = {
-    }
     
-    if search_term:
-        data['user_name'] = search_term
+    #if search_term:
+    #    data['user_name'] = search_term
     
-    response = requests.request("GET", url, headers=headers, json=data)
+    response = requests.request("GET", url=url, headers=headers)
+    print("response.status_code:{}".format(response.status_code))
     if response.status_code == 200:
-        
-        results = []
-        
-        users = json.loads(response._content)['data']
-        for user in users:
-            status,msg = get_user(user["name"])
-            results.append(msg)
-        
-        return 200, results
+        return 200, json.loads(response._content)['data']
     else:
         error_str = utils.safe_get_error_str(response)
         if EMPLOYEE_NOT_FOUND_ERROR_MESSAGE in error_str:
@@ -285,6 +279,29 @@ def list_user(search_term = None):
             print('\t'.join(['Error during ERPNext API Call.', str(search_term), error_str]))
         return response.status_code, error_str
 
+def list_biodata(user_id):
+    """
+    Example: list_biodata(1)
+    """
+    fields = 'fields=["zk_user","type","no","index","valid","valid","format","major_version","minor_version","template"]'
+    filters = f'filters=[["zk_user","=",{user_id}]]'
+    url = f'{config.ERPNEXT_URL}/api/resource/ZK Bio Data?{fields}&{filters}'
+    headers = utils.get_headers()
+    
+    response = requests.request("GET", url=url, headers=headers)
+    print("response.status_code:{}".format(response.status_code))
+    if response.status_code == 200:
+        print("==================================")
+        print("response._content:",response._content)
+        print("==================================")
+        return 200, json.loads(response._content)['data']
+    else:
+        error_str = utils.safe_get_error_str(response)
+        if EMPLOYEE_NOT_FOUND_ERROR_MESSAGE in error_str:
+            print('\t'.join(['Error during ERPNext API Call.', str(user_id), error_str]))
+        else:
+            print('\t'.join(['Error during ERPNext API Call.', str(user_id), error_str]))
+        return response.status_code, error_str
     
 def get_user(name):
     """
