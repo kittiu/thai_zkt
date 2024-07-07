@@ -16,11 +16,13 @@ def handle_cdata_get(args):
     language = utils.get_arg(args,'language')
     pushver = utils.get_arg(args,'pushver')
     pushflag = utils.get_arg(args,'PushOptionsFlag')
+    devicetype = utils.get_arg(args,'DeviceType')
         
     print("Options:",options)
     print("Language:",language)
     print("Push Ver:",pushver)
     print("Push Options Flag:",pushflag)
+    print("Device Type:",devicetype)
     
     ret_msg = "\n".join([f"GET OPTION FROM: {serial_number}"
     , "TransFlag=TransData AttLog	OpLog	AttPhoto	EnrollFP	EnrollUser	FPImag	ChgUser	ChgFP	FACE	UserPic	FVEIN	BioPhoto"

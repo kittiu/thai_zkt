@@ -46,7 +46,14 @@ def get_context(context):
 		print("info:", info)
 
 		# process args and data
-		ret_msg = service.update_terminal_info(serial_number, post_args, info)
+		ret_msg = service.update_terminal_info(serial_number, info)
+		if ret_msg == "OK":
+			ret_msg = service.update_terminal_option(serial_number, info)
+
+		if ret_msg == "OK":
+			status_code, message = service.get_terminal_registry_code(serial_number)
+			if status_code == 200:
+				ret_msg = "RegistryCode=" + message
 	
 	# send msg back to terminal
 	print("RETURN:",ret_msg)

@@ -12,12 +12,22 @@ mit
 
 - Serial Number (Frappe "Name")
 - Alias
+- Device Type
+- Push Version
 - IP Address
 - Model
 - Platform
 - FW Version
-- Push Version
 - Last Activity
+- Registry Code
+
+
+##### ZK Terminal Option
+
+- Frappe "Name" (Autoincrement)
+- ZK Terminal (FK "ZK Terminal")
+- Option Name
+- Option Value
 
 
 ##### ZK User

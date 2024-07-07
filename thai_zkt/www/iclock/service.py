@@ -93,11 +93,15 @@ def save_terminal(serial_number, info):
     url = f"{config.ERPNEXT_URL}/api/resource/ZK Terminal/" + serial_number
     headers = utils.get_headers()
 
-    data = {
-        'fw_version' : info.get('FWVersion',info.get('FirmVer',"")),
-        'platform' : info.get('~Platform',"")
-	}
+    data = {}
+
+    fw_version = info.get('FWVersion',info.get('FirmVer',""))
+    if fw_version:
+        data['fw_version'] = fw_version
     
+    if info.get('~Platform') != None:
+        data['platform'] = info['~Platform']
+        
     if info.get('IPAddress') != None:
         data['ip_address'] = info['IPAddress']
         
@@ -106,6 +110,9 @@ def save_terminal(serial_number, info):
 
     if info.get('PushVersion') != None:
         data['push_version'] = info['PushVersion']
+        
+    if info.get('DeviceType') != None:
+        data['device_type'] = info['DeviceType']
 
     response = requests.request("PUT", url, headers=headers, json=data)
     if response.status_code == 200:
@@ -114,6 +121,85 @@ def save_terminal(serial_number, info):
     else:
         error_str = utils.safe_get_error_str(response)
         print('\t'.join(['Error during ERPNext API Call.', str(serial_number), str(info),  error_str]))
+        return response.status_code, error_str
+
+def update_terminal_option(serial_number, options):
+
+    ret_msg = "OK"
+
+    # delete old ZK Terminal options
+    try:
+        erpnext_status_code, erpnext_message = delete_terminal_option(serial_number)
+        if erpnext_status_code == 200:
+            ret_msg = "OK"
+        else:
+            ret_msg = "Err:" + str(erpnext_status_code) + ":" + erpnext_message
+    except Exception as e:
+        logger.exception('ERR:' + str(e))
+        ret_msg = "ERROR"
+
+
+    if ret_msg == "OK":
+        # update ZK Terminal with options
+        for key,value in options.items():
+            try:
+                erpnext_status_code, erpnext_message = create_terminal_option(serial_number, key, value)
+                if erpnext_status_code == 200:
+                    ret_msg = "OK"
+                else:
+                    ret_msg = "Err:" + str(erpnext_status_code) + ":" + erpnext_message
+            except frappe.DoesNotExistError:
+                ret_msg = "ERR:ZK Terminal Option'" + serial_number + "' does not exist!"
+            except Exception as e:
+                logger.exception('ERR:' + str(e))
+                ret_msg = "ERROR"
+            if ret_msg != "OK":
+                break
+
+    return ret_msg
+
+def delete_terminal_option(serial_number):
+    """
+    Example: delete_terminal_option('CCK24212349')
+    """
+    url = f"{config.ERPNEXT_URL}/api/method/thai_zkt.api.delete_terminal_option"
+    
+    headers = utils.get_headers()
+
+    data = {
+        "zk_terminal":serial_number
+    }
+
+    response = requests.request("POST", url, headers=headers, json=data)
+    if response.status_code == 200:
+        print("response.content",response._content)
+        return 200, response._content
+    else:
+        error_str = utils.safe_get_error_str(response)
+        print('\t'.join(['Error during ERPNext API Call.', str(serial_number), error_str]))
+        return response.status_code, error_str
+
+
+def create_terminal_option(serial_number, key, value):
+    """
+    Example: create_terminal_option('CCK24212349', "ProtVer", "3.1.2")
+    """
+    url = f"{config.ERPNEXT_URL}/api/resource/ZK Terminal Option"
+    headers = utils.get_headers()
+
+    data = {
+        "zk_terminal":serial_number,
+        "key":key,
+        "value":value
+    }
+
+    response = requests.request("POST", url, headers=headers, json=data)
+    if response.status_code == 200:
+        print("response.content",response._content)
+        return 200, json.loads(response._content)['data']['name']
+    else:
+        error_str = utils.safe_get_error_str(response)
+        print('\t'.join(['Error during ERPNext API Call.', str(serial_number), str(key), str(value),  error_str]))
         return response.status_code, error_str
 
 
@@ -141,8 +227,6 @@ def create_attendance(employee_field_value, timestamp, device_id=None, log_type=
             print('\t'.join(['Error during ERPNext API Call.', str(employee_field_value), str(timestamp.timestamp()), str(device_id), str(log_type), error_str]))
         return response.status_code, error_str
 
-
-
 def get_terminal_alias(serial_number):
     """
     Example: get_terminal_alias('CBE13422349')
@@ -162,6 +246,25 @@ def get_terminal_alias(serial_number):
             print('\t'.join(['Error during ERPNext API Call.', str(serial_number), error_str]))
         return response.status_code, error_str
 
+
+def get_terminal_registry_code(serial_number):
+    """
+    Example: get_terminal_registry_code('CBE13422349')
+    """
+    url = f"{config.ERPNEXT_URL}/api/resource/ZK Terminal/" + serial_number
+    headers = utils.get_headers()
+    data = {
+    }
+    response = requests.request("GET", url, headers=headers, json=data)
+    if response.status_code == 200:
+        return 200, json.loads(response._content)['data']['registry_code']
+    else:
+        error_str = utils.safe_get_error_str(response)
+        if EMPLOYEE_NOT_FOUND_ERROR_MESSAGE in error_str:
+            print('\t'.join(['Error during ERPNext API Call.', str(serial_number), error_str]))
+        else:
+            print('\t'.join(['Error during ERPNext API Call.', str(serial_number), error_str]))
+        return response.status_code, error_str
 
 
 def setup_logger(name, log_file, level=logging.INFO, formatter=None):

@@ -29,19 +29,27 @@ def get_context(context):
 	ret_msg = "OK"
 	serial_number = utils.get_arg(args,'SN')
 	print("Serial Number:",serial_number)
-
-
      
 	if request.method == 'GET':
 		options = utils.get_arg(args,'options')
 		language = utils.get_arg(args,'language')
 		pushver = utils.get_arg(args,'pushver')
 		pushflag = utils.get_arg(args,'PushOptionsFlag')
-          
+		devicetype = utils.get_arg(args,'DeviceType')
+  
 		print("Options:",options)
 		print("Language:",language)
 		print("Push Ver:",pushver)
 		print("Push Options Flag:",pushflag)
+		print("Device Type:",devicetype)
+  
+		info = {
+			"PushVersion":pushver,
+			"DeviceType":devicetype
+		}
+  
+		ret_msg = service.update_terminal_info(serial_number, info)
+		print("update_terminal_info:ret_msg:",ret_msg)
 
 		data = request.get_data(True,True)
 		print("data:",data)
