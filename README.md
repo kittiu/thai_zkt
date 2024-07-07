@@ -41,7 +41,7 @@ mit
 
 ##### ZK Bio Data
 
-- Frappe "Name"
+- Frappe "Name" (Autoincrement)
 - ZK User (FK "ZK User")
 - Type
 - No
@@ -64,7 +64,7 @@ mit
 
 ##### ZK Command
 
-- Frappe "Name"
+- Frappe "Name" (Autoincrement)
 - Terminal (FK "ZK Terminal")
 - Terminal Alias
 - Command
@@ -76,7 +76,7 @@ mit
 #### TODO
 
 ##### Frappe
-- [x] Guest URL /iclock
+- [X] Guest URL /iclock
 - [ ] Read/Write File (Bio Photo)
 - [X] ZK Terminal Page
     - [ ] Upload Users to Server
@@ -88,12 +88,28 @@ mit
 
 ##### /iclock command
 
+- [X] Initialize ZK Terminal
+    - [X] Push V.3
 - [X] Get ZK Terminal Info
+    - [X] Push V.2
+    - [ ] Push V.3
 - [X] Get Users
+    - [X] Push V.2
+    - [ ] Push V.3
 - [ ] Clear Users
 - [X] Set Users
+    - [X] Push V.2
+    - [ ] Push V.3
 - [X] Get Face Template
+    - [X] Push V.2
+    - [ ] Push V.3
 - [X] Set Face Template
+    - [X] Push V.2
+    - [ ] Push V.3
 - [ ] Get Fingerprint Template
+    - [ ] Push V.3
 - [ ] Set Fingerprint Template
-- [x] Get Attendance
+    - [ ] Push V.3
+- [X] Get Attendance
+    - [X] Push V.2
+    - [ ] Push V.3
