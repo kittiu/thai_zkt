@@ -112,4 +112,4 @@ mit
     - [ ] Push V.3
 - [X] Get Attendance
     - [X] Push V.2
-    - [ ] Push V.3
+    - [X] Push V.3

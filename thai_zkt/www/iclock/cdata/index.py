@@ -122,19 +122,19 @@ def get_context(context):
 
 			erpnext_status_code, erpnext_message = service.get_terminal_alias(serial_number)
 			if erpnext_status_code == 200:
-					device_id = erpnext_message
-					print("Alias:",device_id)
+				device_id = erpnext_message
+				print("Alias:",device_id)
 			else:
-					print("\t".join([str(erpnext_status_code), str(device_attendance_log['uid']),
-                        str(device_attendance_log['user_id']), str(device_attendance_log['timestamp'].timestamp()),
-                        str(device_attendance_log['punch']), str(device_attendance_log['status']),
-                        json.dumps(device_attendance_log, default=str)]))
-					attendance_failed_logger.error("\t".join([str(erpnext_status_code), str(device_attendance_log['uid']),
-                        str(device_attendance_log['user_id']), str(device_attendance_log['timestamp'].timestamp()),
-                        str(device_attendance_log['punch']), str(device_attendance_log['status']),
-                        json.dumps(device_attendance_log, default=str)]))
-					if not(any(error in erpnext_message for error in service.allowlisted_errors)):
-						raise Exception('API Call to ERPNext Failed.')
+				print("\t".join([str(erpnext_status_code), str(device_attendance_log['uid']),
+                    str(device_attendance_log['user_id']), str(device_attendance_log['timestamp'].timestamp()),
+                    str(device_attendance_log['punch']), str(device_attendance_log['status']),
+                    json.dumps(device_attendance_log, default=str)]))
+				attendance_failed_logger.error("\t".join([str(erpnext_status_code), str(device_attendance_log['uid']),
+                    str(device_attendance_log['user_id']), str(device_attendance_log['timestamp'].timestamp()),
+                    str(device_attendance_log['punch']), str(device_attendance_log['status']),
+                    json.dumps(device_attendance_log, default=str)]))
+				if not(any(error in erpnext_message for error in service.allowlisted_errors)):
+					raise Exception('API Call to ERPNext Failed.')
 
 			print("before setup log")
 			attendance_success_log_file = '_'.join(["attendance_success_log", device_id])
@@ -240,7 +240,80 @@ def get_context(context):
 			if template_cnt > 0:
 				ret_msg = "OK:" + str(template_cnt)
 
+		elif table == "rtlog":
 
+			words = data.split("\t")
+			print("words:",words)
+   
+			device_attendance_log = {}
+   
+			kv = words[0].split("=")
+			device_attendance_log["timestamp"] = utils.safe_convert_date(kv[1], "%Y-%m-%d %H:%M:%S")
+			kv = words[1].split("=")
+			device_attendance_log["user_id"] = kv[1]
+			kv = words[3].split("=")
+			eventaddr = kv[1]
+			kv = words[4].split("=")
+			event = kv[1]
+			kv = words[5].split("=")
+			device_attendance_log["punch"] = kv[1]
+			kv = words[6].split("=")
+			verifytype = kv[1]
+			kv = words[7].split("=")
+			index = kv[1]
+
+			device_attendance_log["uid"] = "0"
+			device_attendance_log["status"] = "0"
+
+			if event == "0":
+   
+				erpnext_status_code, erpnext_message = service.get_terminal_alias(serial_number)
+				if erpnext_status_code == 200:
+					device_id = erpnext_message
+					print("Alias:",device_id)
+				else:
+					print("\t".join([str(erpnext_status_code), str(device_attendance_log['uid']),
+						str(device_attendance_log['user_id']), str(device_attendance_log['timestamp'].timestamp()),
+						str(device_attendance_log['punch']), str(device_attendance_log['status']),
+						json.dumps(device_attendance_log, default=str)]))
+					attendance_failed_logger.error("\t".join([str(erpnext_status_code), str(device_attendance_log['uid']),
+						str(device_attendance_log['user_id']), str(device_attendance_log['timestamp'].timestamp()),
+						str(device_attendance_log['punch']), str(device_attendance_log['status']),
+						json.dumps(device_attendance_log, default=str)]))
+					if not(any(error in erpnext_message for error in service.allowlisted_errors)):
+						raise Exception('API Call to ERPNext Failed.')
+
+				print("before setup log")
+				attendance_success_log_file = '_'.join(["attendance_success_log", device_id])
+				attendance_failed_log_file = '_'.join(["attendance_failed_log", device_id])
+				attendance_success_logger = service.setup_logger(attendance_success_log_file, '/'.join([config.LOGS_DIRECTORY, attendance_success_log_file])+'.log')
+				attendance_failed_logger = service.setup_logger(attendance_failed_log_file, '/'.join([config.LOGS_DIRECTORY, attendance_failed_log_file])+'.log')
+				print("after setup log")
+
+				print("attendance:",device_attendance_log)
+				punch_direction = None
+				erpnext_status_code, erpnext_message = service.create_attendance(device_attendance_log['user_id'], device_attendance_log['timestamp'], device_id, punch_direction)
+				if erpnext_status_code == 200:
+					print("\t".join([erpnext_message, str(device_attendance_log['uid']),
+						str(device_attendance_log['user_id']), str(device_attendance_log['timestamp'].timestamp()),
+						str(device_attendance_log['punch']), str(device_attendance_log['status']),
+						json.dumps(device_attendance_log, default=str)]))
+					attendance_success_logger.info("\t".join([erpnext_message, str(device_attendance_log['uid']),
+						str(device_attendance_log['user_id']), str(device_attendance_log['timestamp'].timestamp()),
+						str(device_attendance_log['punch']), str(device_attendance_log['status']),
+						json.dumps(device_attendance_log, default=str)]))
+
+				else:
+					print("\t".join([str(erpnext_status_code), str(device_attendance_log['uid']),
+						str(device_attendance_log['user_id']), str(device_attendance_log['timestamp'].timestamp()),
+						str(device_attendance_log['punch']), str(device_attendance_log['status']),
+						json.dumps(device_attendance_log, default=str)]))
+					attendance_failed_logger.error("\t".join([str(erpnext_status_code), str(device_attendance_log['uid']),
+						str(device_attendance_log['user_id']), str(device_attendance_log['timestamp'].timestamp()),
+						str(device_attendance_log['punch']), str(device_attendance_log['status']),
+						json.dumps(device_attendance_log, default=str)]))
+					if not(any(error in erpnext_message for error in service.allowlisted_errors)):
+						raise Exception('API Call to ERPNext Failed.')
       
 		else:
 
