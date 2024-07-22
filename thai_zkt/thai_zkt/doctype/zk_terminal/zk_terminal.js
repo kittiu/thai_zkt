@@ -50,4 +50,62 @@ frappe.ui.form.on("ZK Terminal", {
         }
     },
 
+    refresh:function(frm) {
+        frm.add_custom_button(__("Clear"), function() {
+            frappe.confirm(
+                'Are you sure to Clear User in Terminal "'+frm.doc.name+'"?',
+                function(){
+                    window.close();
+
+                    frappe.call({
+                        method: 'thai_zkt.thai_zkt.doctype.zk_terminal.zk_terminal.clear_terminal_user',
+                        args: {
+                            terminal: frm.doc.name
+                        },
+                        freeze: true,
+                        callback: (r) => {
+                            frappe.msgprint("Clear Terminal "+frm.doc.name);
+                        },
+                        error: (r) => {
+                            frappe.msgprint("Error Clear Terminal "+frm.doc.name);
+                        }
+                    })                    
+                },
+                function(){
+                    window.close();
+                }
+            )
+        }, __("User"));
+
+        frm.add_custom_button(__("Download to Terminal"), function() {
+            frappe.confirm(
+                'Are you sure to Download User to Terminal "'+frm.doc.name+'"?',
+                function(){
+                    window.close();
+
+                    frappe.call({
+                        method: 'thai_zkt.thai_zkt.doctype.zk_terminal.zk_terminal.download_terminal_user',
+                        args: {
+                            terminal: frm.doc.name
+                        },
+                        freeze: true,
+                        callback: (r) => {
+                            frappe.msgprint("Download to Terminal "+frm.doc.name);
+                        },
+                        error: (r) => {
+                            frappe.msgprint("Error Download to Terminal "+frm.doc.name);
+                        }
+                    })                    
+                },
+                function(){
+                    window.close();
+                }
+            )
+        }, __("User"));
+
+        frm.add_custom_button(__("Upload to Server"), function() {
+            frappe.msgprint(frm.doc.name);
+        }, __("User"));
+    }
+
 });

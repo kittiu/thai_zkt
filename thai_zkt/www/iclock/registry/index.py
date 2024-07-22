@@ -1,3 +1,4 @@
+# Push V.3
 from asyncio.log import logger
 import frappe
 from urllib.parse import urlparse, parse_qs
@@ -42,6 +43,7 @@ def get_context(context):
 				words = line.split("=")
 				info[words[0]] = words[1]
 
+		info.pop('PushVersion', None);
 		print("post_args:", post_args)
 		print("info:", info)
 
@@ -51,11 +53,12 @@ def get_context(context):
 			ret_msg = service.update_terminal_option(serial_number, info)
 
 		if ret_msg == "OK":
-			status_code, message = service.get_terminal_registry_code(serial_number)
+			status_code, message = service.get_terminal(serial_number)
 			if status_code == 200:
-				ret_msg = "RegistryCode=" + message
+				terminal = message
+				ret_msg = "RegistryCode=" + terminal["registry_code"]
 	
 	# send msg back to terminal
-	print("RETURN:",ret_msg)
+	print(">>>> RETURN:",ret_msg)
 	context.ret_msg = ret_msg
 	return context

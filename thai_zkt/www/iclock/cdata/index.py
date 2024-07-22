@@ -120,9 +120,10 @@ def get_context(context):
 
 			print("logs:",logs)
 
-			erpnext_status_code, erpnext_message = service.get_terminal_alias(serial_number)
+			erpnext_status_code, erpnext_message = service.get_terminal(serial_number)
 			if erpnext_status_code == 200:
-				device_id = erpnext_message
+				terminal = erpnext_message
+				device_id = terminal["alias"]
 				print("Alias:",device_id)
 			else:
 				print("\t".join([str(erpnext_status_code), str(device_attendance_log['uid']),
@@ -185,6 +186,7 @@ def get_context(context):
 				if words[0].startswith("USER PIN"):
 					kv = words[0].split("=")
 					user_id = kv[1]
+					pin = kv[1]
 					kv = words[1].split("=")
 					user_name = kv[1]
 					kv = words[2].split("=")
@@ -194,7 +196,7 @@ def get_context(context):
 					kv = words[5].split("=")
 					user_grp = kv[1]
      
-					erpnext_status_code, erpnext_message = service.create_user(user_id, user_name, user_pri, user_password, user_grp)
+					erpnext_status_code, erpnext_message = service.create_user(user_id, user_name, user_pri, user_password, user_grp, pin)
 					if erpnext_status_code == 200:
 						user_cnt += 1
 
@@ -267,9 +269,10 @@ def get_context(context):
 
 			if event == "0":
    
-				erpnext_status_code, erpnext_message = service.get_terminal_alias(serial_number)
+				erpnext_status_code, erpnext_message = service.get_terminal(serial_number)
 				if erpnext_status_code == 200:
-					device_id = erpnext_message
+					terminal = erpnext_message
+					device_id = terminal["alias"]
 					print("Alias:",device_id)
 				else:
 					print("\t".join([str(erpnext_status_code), str(device_attendance_log['uid']),

@@ -1,9 +1,10 @@
 import frappe
 from asyncio.log import logger
 from urllib.parse import urlparse, parse_qs
-import thai_zkt.www.iclock.local_config as config
 import thai_zkt.www.iclock.utils as utils
 import thai_zkt.www.iclock.service as service
+import thai_zkt.www.iclock.push_protocol_2 as push2
+import thai_zkt.www.iclock.push_protocol_3 as push3
 
 no_cache = 1
 
@@ -34,7 +35,7 @@ def get_context(context):
 
 		data = request.get_data(True,True)
 		print("data:",data)
-
+  
 		if info == "":
 			# check ZK Command DocType
 			ret_msg = get_command(serial_number)
@@ -51,6 +52,8 @@ def get_context(context):
 def get_command(serial_number):
 
 	ret_msg = "OK"
+ 
+	code, terminal = service.get_terminal(serial_number)
 
 	dt_ZKCommand = frappe.qb.DocType('ZK Command')
 	cmds = (
@@ -68,7 +71,7 @@ def get_command(serial_number):
 		print("ZK Command.id:",cmd_id,",",d_ZKCommand.command)
   
 		if d_ZKCommand.command.startswith("_"):
-			ret_msg = get_special_command(serial_number, cmd_id, d_ZKCommand.command)
+			ret_msg = get_special_command(serial_number, cmd_id, d_ZKCommand.command, terminal)
 
 		#set ZK Command status to 'Sent'
 		erpnext_status_code, erpnext_message = service.update_command_status(cmd_id, "Sent")
@@ -89,7 +92,7 @@ def get_command(serial_number):
 	return ret_msg
 
 
-def get_special_command(serial_number, cmd_id, cmd):
+def get_special_command(serial_number, cmd_id, cmd, terminal):
     
 	ret_msg = "OK"
     
@@ -107,14 +110,20 @@ def get_special_command(serial_number, cmd_id, cmd):
     
 				if len(users) > 0:
 					ret_msg = ""
-    
+
+
+				if terminal["push_version"].startswith("3"):
+					push = push3
+				else:
+					push = push2
+
 				for user in users:
-					cmd_line = 'DATA UPDATE USERINFO ' + get_user_info(user)
+					cmd_line = push.get_cmd_update_user(user)
 					status, new_cmd_id = service.create_command(serial_number, cmd_line, 'Sent')
 					
 					ret_msg += 'C:' + str(new_cmd_id) + ':' + cmd_line + '\n'
-     
-					#TODO create UPDATE BIODATA msg
+
+					#create UPDATE BIODATA command
 					try:
 						erpnext_status_code, erpnext_message = service.list_biodata(user["id"])
 						if erpnext_status_code == 200:
@@ -122,7 +131,7 @@ def get_special_command(serial_number, cmd_id, cmd):
 							biodata = erpnext_message
 				
 							for data in biodata:
-								cmd_line = 'DATA UPDATE BIODATA ' + get_biodata_info(data)
+								cmd_line = push.get_cmd_update_biodata(data)
 								status, new_cmd_id = service.create_command(serial_number, cmd_line, 'Sent')
 								
 								ret_msg += 'C:' + str(new_cmd_id) + ':' + cmd_line + '\n'
@@ -136,7 +145,30 @@ def get_special_command(serial_number, cmd_id, cmd):
 					except Exception as e:
 						logger.exception('ERR:' + str(e))
 						ret_msg = "ERROR"
-    
+      
+					#create UPDATE BIOPHOTO command
+					try:
+						erpnext_status_code, erpnext_message = service.list_biophoto(user["id"])
+						if erpnext_status_code == 200:
+				
+							biophoto = erpnext_message
+				
+							for data in biophoto:
+								cmd_line = push.get_cmd_update_biophoto(data)
+								status, new_cmd_id = service.create_command(serial_number, cmd_line, 'Sent')
+								
+								ret_msg += 'C:' + str(new_cmd_id) + ':' + cmd_line + '\n'
+				
+						elif erpnext_status_code == 404:
+							ret_msg = "ERR:ZK Bio Photo of User '" + user["id"] + "' does not exist!"
+						else:
+							ret_msg = "Err:" + str(erpnext_status_code) + ":" + erpnext_message
+					except frappe.DoesNotExistError:
+						ret_msg = "ERR:ZK Bio Phot of User '" + user["id"] + "' does not exist!"
+					except Exception as e:
+						logger.exception('ERR:' + str(e))
+						ret_msg = "ERROR"
+      
 			elif erpnext_status_code == 404:
 				ret_msg = "ERR:ZK User does not exist!"
 			else:
@@ -146,36 +178,11 @@ def get_special_command(serial_number, cmd_id, cmd):
 		except Exception as e:
 			logger.exception('ERR:' + str(e))
 			ret_msg = "ERROR"
-    
+
+	elif cmd == "_CHECK":
+		ret_msg = push3.cmd_check(serial_number)
+  
+	elif cmd == "_GET_OPTIONS":
+		ret_msg = push3.cmd_get_options(serial_number)
+
 	return ret_msg
-
-
-
-def get_user_info(user):
-    
-    user_info = "\t".join(["PIN=" + str(user["id"])
-                           ,"Name=" + user["user_name"]
-                           ,"Pri=" + user["privilege"]
-                           ,"Passwd=" + user["password"]
-                           ,"Card="
-                           ,""
-                           ,"Grp=" + user["group"]
-                           ,"Verify=0"
-                           ])
-    
-    return user_info
-
-def get_biodata_info(biodata):
-	
-	biodata_info = "\t".join(["Pin=" + str(biodata["zk_user"])
-                           ,"No=" + str(biodata["no"])
-                           ,"Index="+ str(biodata["index"])
-                           ,"Valid="+ str(biodata["valid"])
-                           ,"Duress=0"
-                           ,"Type="+ str(biodata["type"])
-                           ,"MajorVer=" + biodata["major_version"]
-                           ,"MinorVer=" + biodata["minor_version"]
-                           ,"Tmp="+biodata["template"]
-                           ])
-
-	return biodata_info

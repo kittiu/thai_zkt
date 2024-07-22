@@ -16,7 +16,8 @@
   "platform",
   "fw_version",
   "last_activity",
-  "registry_code"
+  "registry_code",
+  "options"
  ],
  "fields": [
   {
@@ -73,11 +74,16 @@
    "fieldname": "device_type",
    "fieldtype": "Data",
    "label": "Device Type"
+  },
+  {
+   "fieldname": "options",
+   "fieldtype": "Long Text",
+   "label": "Options"
   }
  ],
  "index_web_pages_for_search": 1,
  "links": [],
- "modified": "2024-07-07 12:02:27.646231",
+ "modified": "2024-07-13 13:53:04.544693",
  "modified_by": "Administrator",
  "module": "Thai ZKT",
  "name": "ZK Terminal",

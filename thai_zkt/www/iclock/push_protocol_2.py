@@ -47,3 +47,55 @@ def handle_cdata_get(args):
     , "PhotoStamp=0\n"])
     
     return ret_msg
+
+
+def get_cmd_update_user(user):
+    return 'DATA UPDATE USERINFO ' + encode_user(user)
+
+def get_cmd_update_biodata(data):
+    return 'DATA UPDATE BIODATA ' + encode_biodata(data)
+
+def get_cmd_update_biophoto(data):
+    return 'DATA UPDATE BIOPHOTO ' + encode_biophoto(data)
+
+
+def encode_user(user):
+    
+    encode = "\t".join(["PIN=" + str(user["id"])
+                           ,"Name=" + user["user_name"]
+                           ,"Pri=" + user["privilege"]
+                           ,"Passwd=" + user["password"]
+                           ,"Card="
+                           ,""
+                           ,"Grp=" + user["group"]
+                           ,"Verify=0"
+                           ])
+    
+    return encode
+
+def encode_biodata(biodata):
+	
+	encode = "\t".join(["Pin=" + str(biodata["zk_user"])
+                           ,"No=" + str(biodata["no"])
+                           ,"Index="+ str(biodata["index"])
+                           ,"Valid="+ str(biodata["valid"])
+                           ,"Duress=0"
+                           ,"Type="+ str(biodata["type"])
+                           ,"MajorVer=" + biodata["major_version"]
+                           ,"MinorVer=" + biodata["minor_version"]
+                           ,"Tmp="+biodata["template"]
+                           ])
+
+	return encode
+
+def encode_biophoto(biophoto):
+    encode = "\t".join(["PIN=" + str(biophoto["zk_user"])
+                           ,"Type="+ str(biophoto["type"])
+                           ,"Size=" + str(biophoto["size"])
+                           ,"Format=0"
+                           ,"PostBackTmpFlag=0"
+                           ,"Url=1.jpg"
+                           ,"Content="+biophoto["content"]
+                           ])
+
+    return encode

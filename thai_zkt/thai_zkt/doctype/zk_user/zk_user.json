@@ -10,7 +10,8 @@
   "user_name",
   "password",
   "privilege",
-  "group"
+  "group",
+  "uid"
  ],
  "fields": [
   {
@@ -40,11 +41,16 @@
    "fieldname": "group",
    "fieldtype": "Data",
    "label": "Group"
+  },
+  {
+   "fieldname": "uid",
+   "fieldtype": "Data",
+   "label": "UID"
   }
  ],
  "index_web_pages_for_search": 1,
  "links": [],
- "modified": "2024-07-02 07:19:48.124529",
+ "modified": "2024-07-20 06:21:33.539187",
  "modified_by": "Administrator",
  "module": "Thai ZKT",
  "name": "ZK User",

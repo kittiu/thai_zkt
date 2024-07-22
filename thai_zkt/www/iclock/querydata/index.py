@@ -24,13 +24,28 @@ def get_context(context):
 	print("args:",args)
 
 	serial_number = utils.get_arg(args,'SN')
-	print("/push Serial Number:",serial_number)
+	print("/querydata Serial Number:",serial_number)
  
 	data = request.get_data(True,True)
 	print("data:",data)
  
 	if request.method == 'POST':
-			ret_msg = push3.handle_push_post(serial_number)
+     
+		type = utils.get_arg(args,'type')
+
+		if type == "options":
+			ret_msg = push3.handle_querydata_post_options(serial_number,data)
+   
+		elif type == "tabledata":
+	
+			tablename = utils.get_arg(args,'tablename')
+
+			if tablename == "user":
+				ret_msg = push3.handle_querydata_post_tabledata_user(data)
+			elif tablename == "biodata":
+				ret_msg = push3.handle_querydata_post_tabledata_biodata(data)
+			elif tablename == "biophoto":
+				ret_msg = push3.handle_querydata_post_tabledata_biophoto(data)
 
 
 	# send msg back to terminal

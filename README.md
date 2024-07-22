@@ -20,6 +20,7 @@ mit
 - FW Version
 - Last Activity
 - Registry Code
+- Options
 
 
 ##### ZK Terminal Option
@@ -32,12 +33,12 @@ mit
 
 ##### ZK User
 
-- ID (Frappe "Name")
+- ID (Frappe "Name") (ZKTeco 'pin')
 - User Name
 - Password
 - Privilege
 - Group
-
+- UID
 
 ##### ZK Bio Data
 
@@ -77,10 +78,10 @@ mit
 
 ##### Frappe
 - [X] Guest URL /iclock
-- [ ] Read/Write File (Bio Photo)
 - [X] ZK Terminal Page
+    - [X] Clear Users in ZK Terminal
+    - [X] Download Users to ZK Terminal
     - [ ] Upload Users to Server
-    - [ ] Download Users to ZK Terminal
     - [ ] Restore Users to ZK Terminal
     - [ ] Log
 - [X] ZK User Page
@@ -89,27 +90,36 @@ mit
 ##### /iclock command
 
 - [X] Initialize ZK Terminal
-    - [X] Push V.3
+    - [X] Push V.3 (/registry, /push)
 - [X] Get ZK Terminal Info
-    - [X] Push V.2
-    - [ ] Push V.3
+    - [X] Push V.2 (ZK Command : 'INFO', /devicecmd)
+    - [X] Push V.3 (ZK Command : '_GET_OPTIONS')
 - [X] Get Users
-    - [X] Push V.2
-    - [ ] Push V.3
-- [ ] Clear Users
+    - [X] Push V.2 (ZK Command : 'CHECK', /cdata?table=OPERLOG)
+    - [X] Push V.3 (ZK Command : 'DATA QUERY tablename=user,fielddesc=*,filter=*')
 - [X] Set Users
-    - [X] Push V.2
-    - [ ] Push V.3
+    - [X] Push V.2 (ZK Command : '_UPDATE')
+    - [X] Push V.3 (ZK Command : 'DATA UPDATE user CardNo= Pin=1 Password=234 Group=0 StartTime=0 EndTime=0 Name= Privilege=0')
+- [X] Get Face Photo
+    - [X] Push V.3 (ZK Command : 'DATA QUERY tablename=biophoto,fielddesc=*,filter=*')
+- [X] Set Face Photo
+    - [X] Push V.3 (ZK Command : 'DATA UPDATE biophoto PIN=1 Type=9 Size=10000 Content=${XXX} Format=0 Url=${XXX} PostBackTmpFlag=0')
 - [X] Get Face Template
-    - [X] Push V.2
-    - [ ] Push V.3
+    - [X] Push V.2 (ZK Command : 'CHECK', /cdata?table=BIODATA)
+    - [X] Push V.3 (ZK Command : 'DATA QUERY tablename=biodata,fielddesc=*,filter=Type=9')
 - [X] Set Face Template
-    - [X] Push V.2
-    - [ ] Push V.3
-- [ ] Get Fingerprint Template
-    - [ ] Push V.3
-- [ ] Set Fingerprint Template
-    - [ ] Push V.3
+    - [X] Push V.2 (ZK Command : '_UPDATE')
+    - [X] Push V.3 (ZK Command : 'DATA UPDATE biodata Pin=2 No=0 Index=0 Valid=1 Duress=0 Type=9 Majorver=5 Minorver=8 Format=0 Tmp=${XXX}')
+- [X] Get Fingerprint Template
+    - [X] Push V.3 (ZK Command : 'DATA QUERY tablename=biodata,fielddesc=*,filter=Type=1')
+- [X] Set Fingerprint Template
+    - [X] Push V.3 (ZK Command : 'DATA UPDATE biodata Pin=2 No=0 Index=0 Valid=1 Duress=0 Type=1 Majorver=5 Minorver=8 Format=0 Tmp=${XXX}')
+- [X] Delete User
+      [x] Push V.3 (ZK Command : 'DATA DELETE user Pin=${XXX}')
+- [X] Delete Bio Data
+      [x] Push V.3 (ZK Command : 'DATA DELETE biodata$ Type=${XXX}')
+- [X] Delete Bio Photo
+      [x] Push V.3 (ZK Command : 'DATA DELETE biophoto$ PIN=${XXX}')
 - [X] Get Attendance
     - [X] Push V.2
     - [X] Push V.3

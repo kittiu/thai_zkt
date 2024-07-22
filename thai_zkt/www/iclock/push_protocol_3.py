@@ -66,3 +66,257 @@ def handle_push_post(serial_number):
     , "MultiBioPhotoSupport=0:0:0:0:0:0:0:0:0:1\n"])
     
     return ret_msg
+
+
+def cmd_get_options(serial_number):
+    print("cmd_get_options()")
+
+    cmd_line_1 = "GET OPTIONS " + get_options_1()
+    status, new_cmd_id_1 = service.create_command(serial_number, cmd_line_1, 'Sent')
+
+    cmd_line_2 = "GET OPTIONS " + get_options_2()
+    status, new_cmd_id_2 = service.create_command(serial_number, cmd_line_2, 'Sent')
+
+    cmd_line_3 = "GET OPTIONS " + get_options_3()
+    status, new_cmd_id_3 = service.create_command(serial_number, cmd_line_3, 'Sent')
+
+    cmd_line_4 = "GET OPTIONS " + get_options_4()
+    status, new_cmd_id_4 = service.create_command(serial_number, cmd_line_4, 'Sent')
+
+    ret_msg = "\d\n\d\n".join(["C:"+ new_cmd_id_1 +":" + cmd_line_1
+                             , "C:"+ new_cmd_id_2 +":" + cmd_line_2
+                             , "C:"+ new_cmd_id_3 +":" + cmd_line_3
+                             , "C:"+ new_cmd_id_4 +":" + cmd_line_4
+                             ]) + "\d\n\d\n"
+
+    return ret_msg
+
+
+def get_options_1():
+    ret_msg = "~SerialNumber,FirmVer,~DeviceName,LockCount,ReaderCount,AuxInCount,AuxOutCount,MachineType,~IsOnlyRFMachine,~MaxUserCount,~MaxAttLogCount,~MaxFingerCount,~MaxUserFingerCount,MThreshold,NetMask,GATEIPAddress,~ZKFPVersion,SimpleEventType,VerifyStyles,EventTypes,ComPwd,MaxMCUCardBits,NewVFStyles,IPAddress,CommType"
+    return ret_msg
+    
+def get_options_2():
+    ret_msg = "~SerialNumber,IclockSvrFun,OverallAntiFunOn,~REXInputFunOn,~CardFormatFunOn,~SupAuthrizeFunOn,~ReaderCFGFunOn,~ReaderLinkageFunOn,~RelayStateFunOn,~Ext485ReaderFunOn,~TimeAPBFunOn,~CtlAllRelayFunOn,~LossCardFunOn,DisableUserFunOn,DeleteAndFunOn,LogIDFunOn,DateFmtFunOn,DelAllLossCardFunOn,DelayOpenDoorFunOn,UserOpenDoorDelayFunOn,MultiCardInterTimeFunOn,DSTFunOn,OutRelaySetFunOn,MachineTZFunOn,AutoServerFunOn,PC485AsInbio485,MasterInbio485,RS232BaudRate,AutoServerMode,IPCLinkFunOn"
+    return ret_msg
+    
+def get_options_3():
+    ret_msg = "~SerialNumber,IPCLinkServerIP,MasterControlOn,SubControlOn,AccSupportFunList,MaskDetectionFunOn,IRTempDetectionFunOn"
+    return ret_msg
+
+def get_options_4():
+    ret_msg = "~SerialNumber,FingerFunOn,FvFunOn,FaceFunOn,~MaxFace7Count,~MaxFvCount,EnalbeIRTempDetection,EnableNormalIRTempPass,EnalbeMaskDetection,EnableWearMaskPass,IRTempThreshold,IRTempUnit,EnableUnregisterPass,EnableTriggerAlarm,IRTempCorrection"
+    return ret_msg
+
+def cmd_check(serial_number):
+    print("cmd_check()")
+
+    cmd_line_1 = "DATA QUERY tablename=user,fielddesc=*,filter=*"
+    status, new_cmd_id_1 = service.create_command(serial_number, cmd_line_1, 'Sent')
+
+    cmd_line_2 = "DATA QUERY tablename=biodata,fielddesc=*,filter=Type=1"
+    status, new_cmd_id_2 = service.create_command(serial_number, cmd_line_2, 'Sent')
+
+    cmd_line_3 = "DATA QUERY tablename=biodata,fielddesc=*,filter=Type=9"
+    status, new_cmd_id_3 = service.create_command(serial_number, cmd_line_3, 'Sent')
+
+    cmd_line_4 = "DATA QUERY tablename=biophoto,fielddesc=*,filter=*"
+    status, new_cmd_id_4 = service.create_command(serial_number, cmd_line_4, 'Sent')
+
+    ret_msg = "\d\n\d\n".join(["C:"+ new_cmd_id_1 +":" + cmd_line_1
+                             , "C:"+ new_cmd_id_2 +":" + cmd_line_2
+                             , "C:"+ new_cmd_id_3 +":" + cmd_line_3
+                             , "C:"+ new_cmd_id_4 +":" + cmd_line_4
+                             ]) + "\d\n\d\n"
+
+    return ret_msg
+
+
+def handle_querydata_post_options(serial_number,data):
+    ret_msg = "OK"
+    
+    #TODO loop data
+        # if exists
+            # update
+        # else
+            # add
+            
+    ret_msg = service.set_terminal_options(serial_number,data)
+    
+    return ret_msg
+
+
+def handle_querydata_post_tabledata_user(data):
+    ret_msg = "OK"
+    
+    lines = data.split("\n")
+    print("lines:",lines)
+
+    user_cnt = 0
+
+    for line in lines:
+        words = line.split("\t")
+        print("words:",words)
+
+        if words[0].startswith("user uid"):
+            kv = words[0].split("=")
+            user_id = kv[1]
+            kv = words[2].split("=")
+            pin = kv[1]
+            kv = words[7].split("=")
+            user_name = kv[1]
+            kv = words[8].split("=")
+            user_pri = kv[1]
+            kv = words[3].split("=")
+            user_password = kv[1]
+            kv = words[4].split("=")
+            user_grp = kv[1]
+
+            erpnext_status_code, erpnext_message = service.create_user(pin, user_name, user_pri, user_password, user_grp, user_id)
+            print("erpnext_status_code:",erpnext_status_code)
+            if erpnext_status_code == 200:
+                user_cnt += 1
+
+    if user_cnt > 0:
+        ret_msg = "user=" + str(user_cnt)
+    
+    return ret_msg
+
+
+def handle_querydata_post_tabledata_biodata(data):
+    ret_msg = "OK"
+    
+    lines = data.split("\r\n")
+    print("lines:",lines)
+
+    biodata_cnt = 0
+
+    for line in lines:
+        words = line.split("\t")
+        print("words:",words)
+
+        if words[0].startswith("biodata"):
+            kv = words[0].split("=")
+            zk_user = kv[1]
+            kv = words[1].split("=")
+            no = kv[1]
+            kv = words[2].split("=")
+            index = kv[1]
+            kv = words[3].split("=")
+            valid = kv[1]
+            kv = words[5].split("=")
+            type = kv[1]
+            kv = words[6].split("=")
+            major_version = kv[1]
+            kv = words[7].split("=")
+            minor_version = kv[1]
+            kv = words[8].split("=")
+            format = kv[1]
+            #kv = words[9].split("=")
+            template = words[9][4:]
+
+            erpnext_status_code, erpnext_message = service.create_bio_data(zk_user, type, no, index, valid, format, major_version, minor_version, template)
+            print("erpnext_status_code:",erpnext_status_code)
+            if erpnext_status_code == 200:
+                biodata_cnt += 1
+
+    if biodata_cnt > 0:
+        ret_msg = "biodata=" + str(biodata_cnt)
+    
+    return ret_msg
+
+
+def handle_querydata_post_tabledata_biophoto(data):
+    ret_msg = "OK"
+    
+    lines = data.split("\n")
+    print("lines:",lines)
+
+    biodata_cnt = 0
+
+    for line in lines:
+        words = line.split("\t")
+        print("words:",words)
+
+        if words[0].startswith("biophoto"):
+            kv = words[0].split("=")
+            zk_user = kv[1]
+            kv = words[1].split("=")
+            no = kv[1]
+            kv = words[2].split("=")
+            index = kv[1]
+            kv = words[3].split("=")
+            file_name = kv[1]
+            kv = words[4].split("=")
+            type = kv[1]
+            kv = words[5].split("=")
+            size = kv[1]
+            content = words[6][8:]
+
+            erpnext_status_code, erpnext_message = service.create_bio_photo(zk_user, type, no, index, file_name, size, content)
+            print("erpnext_status_code:",erpnext_status_code)
+            if erpnext_status_code == 200:
+                biodata_cnt += 1
+
+    if biodata_cnt > 0:
+        ret_msg = "biophoto=" + str(biodata_cnt)
+    
+    return ret_msg
+
+
+def get_cmd_update_user(user):
+    return 'DATA UPDATE user ' + encode_user(user)
+
+def get_cmd_update_biodata(data):
+    return 'DATA UPDATE biodata ' + encode_biodata(data)
+
+def get_cmd_update_biophoto(data):
+    return 'DATA UPDATE biophoto ' + encode_biophoto(data)
+
+def encode_user(user):
+    
+    encode = "\t".join(["Cardno="
+                           ,"Pin=" + str(user["id"])
+                           ,"Password=" + user["password"]
+                           ,"Group=" + user["group"]
+                           ,"Starttime=0"
+                           ,"Endtime=0"
+                           ,"Name=" + user["user_name"]
+                           ,"Privilege=" + user["privilege"]
+                           ,"Disable=0"
+                           ,"Verify=0"
+                           ])
+    return encode
+
+def encode_biodata(biodata):
+    
+    #format = "ZK" if biodata["format"]==0 else str(biodata["format"])
+    format = str(biodata["format"])
+
+    encode = "\t".join(["Pin=" + str(biodata["zk_user"])
+                           ,"No=" + str(biodata["no"])
+                           ,"Index="+ str(biodata["index"])
+                           ,"Valid="+ str(biodata["valid"])
+                           ,"Duress=0"
+                           ,"Type="+ str(biodata["type"])
+                           ,"Majorver=" + biodata["major_version"]
+                           ,"Minorver=" + biodata["minor_version"]
+                           ,"Format=" + format
+                           ,"Tmp="+biodata["template"]
+                           ])
+
+    return encode
+
+
+def encode_biophoto(biophoto):
+    
+    encode = "\t".join(["PIN=" + str(biophoto["zk_user"])
+                           ,"Type="+ str(biophoto["type"])
+                           ,"Size=" + str(biophoto["size"])
+                           ,"Format=0"
+                           ,"PostBackTmpFlag=0"
+                           ,"Url=1.jpg"
+                           ,"Content="+biophoto["content"]
+                           ])
+
+    return encode
