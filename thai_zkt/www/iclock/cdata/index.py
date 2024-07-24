@@ -177,13 +177,13 @@ def get_context(context):
 			lines = data.split("\n")
 			print("lines:",lines)
 
-			user_cnt = 0
+			item_cnt = 0
    
 			for line in lines:
 				words = line.split("\t")
 				print("words:",words)
 
-				if words[0].startswith("USER PIN"):
+				if words[0].startswith("USER"):
 					kv = words[0].split("=")
 					user_id = kv[1]
 					pin = kv[1]
@@ -196,12 +196,32 @@ def get_context(context):
 					kv = words[5].split("=")
 					user_grp = kv[1]
      
-					erpnext_status_code, erpnext_message = service.create_user(user_id, user_name, user_pri, user_password, user_grp, pin)
+					erpnext_status_code, erpnext_message = service.create_user(pin, user_name, user_pri, user_password, user_grp, user_id)
 					if erpnext_status_code == 200:
-						user_cnt += 1
+						item_cnt += 1
+      
+				elif words[0].startswith("BIOPHOTO"):
+					kv = words[0].split("=")
+					pin = kv[1]
+					kv = words[1].split("=")
+					no = kv[1]
+					kv = words[2].split("=")
+					index = kv[1]
+					kv = words[3].split("=")
+					file_name = kv[1]
+					kv = words[4].split("=")
+					type = kv[1]
+					kv = words[5].split("=")
+					size = kv[1]
+					content = words[6][8:]
+     
+					erpnext_status_code, erpnext_message = service.create_bio_photo(pin, type, no, index, file_name, size, content)
+					if erpnext_status_code == 200:
+						item_cnt += 1
+					
 
-			if user_cnt > 0:
-				ret_msg = "OK:" + str(user_cnt)
+			if item_cnt > 0:
+				ret_msg = "OK:" + str(item_cnt) + "\n"
 
 
 
@@ -216,31 +236,33 @@ def get_context(context):
 			for line in lines:
 				words = line.split("\t")
 				print("words:",words)
-				kv = words[0].split("=")
-				zk_user = kv[1]
-				kv = words[1].split("=")
-				no = kv[1]
-				kv = words[2].split("=")
-				index = kv[1]
-				kv = words[3].split("=")
-				valid = kv[1]
-				kv = words[5].split("=")
-				type = kv[1]
-				kv = words[6].split("=")
-				major_version = kv[1]
-				kv = words[7].split("=")
-				minor_version = kv[1]
-				kv = words[8].split("=")
-				format = kv[1]
-				kv = words[9].split("=")
-				template = kv[1]
+    
+				if words[0].startswith("BIODATA"):
+					kv = words[0].split("=")
+					zk_user = kv[1]
+					kv = words[1].split("=")
+					no = kv[1]
+					kv = words[2].split("=")
+					index = kv[1]
+					kv = words[3].split("=")
+					valid = kv[1]
+					kv = words[5].split("=")
+					type = kv[1]
+					kv = words[6].split("=")
+					major_version = kv[1]
+					kv = words[7].split("=")
+					minor_version = kv[1]
+					kv = words[8].split("=")
+					format = kv[1]
+					kv = words[9].split("=")
+					template = kv[1]
 
-				erpnext_status_code, erpnext_message = service.create_bio_data(zk_user, type, no, index, valid, format, major_version, minor_version, template)
-				if erpnext_status_code == 200:
-					template_cnt += 1
+					erpnext_status_code, erpnext_message = service.create_bio_data(zk_user, type, no, index, valid, format, major_version, minor_version, template)
+					if erpnext_status_code == 200:
+						template_cnt += 1
 
 			if template_cnt > 0:
-				ret_msg = "OK:" + str(template_cnt)
+				ret_msg = "OK:" + str(template_cnt) + "\n"
 
 		elif table == "rtlog":
 

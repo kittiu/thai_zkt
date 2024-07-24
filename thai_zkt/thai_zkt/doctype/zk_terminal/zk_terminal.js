@@ -32,6 +32,108 @@ function genNewCode() {
     
 }
 
+function addBtnGetInfo(frm,menu_name) {
+    frm.add_custom_button(__("Get Info"), function() {
+        frappe.call({
+            method: 'thai_zkt.thai_zkt.doctype.zk_terminal.zk_terminal.get_terminal_info',
+            args: {
+                terminal: frm.doc.name
+            },
+            freeze: true,
+            callback: (r) => {
+                frappe.msgprint("Get Options from Terminal "+frm.doc.name);
+            },
+            error: (r) => {
+                frappe.msgprint("Error : "+frm.doc.name);
+            }
+        })                    
+    }, __(menu_name));
+}
+
+function addBtnClearUsers(frm,menu_name) {
+    frm.add_custom_button(__("Clear Users"), function() {
+        frappe.confirm(
+            'Are you sure to Clear Users in Terminal "'+frm.doc.name+'"?',
+            function(){
+                window.close();
+
+                frappe.call({
+                    method: 'thai_zkt.thai_zkt.doctype.zk_terminal.zk_terminal.clear_terminal_user',
+                    args: {
+                        terminal: frm.doc.name
+                    },
+                    freeze: true,
+                    callback: (r) => {
+                        frappe.msgprint("Clear Users in Terminal "+frm.doc.name);
+                    },
+                    error: (r) => {
+                        frappe.msgprint("Error : "+frm.doc.name);
+                    }
+                })                    
+            },
+            function(){
+                window.close();
+            }
+        )
+    }, __(menu_name));
+}
+
+function addBtnSetUsers(frm,menu_name) {
+    frm.add_custom_button(__("Set Users"), function() {
+        frappe.confirm(
+            'Are you sure to Set Users to Terminal "'+frm.doc.name+'"?',
+            function(){
+                window.close();
+
+                frappe.call({
+                    method: 'thai_zkt.thai_zkt.doctype.zk_terminal.zk_terminal.download_terminal_user',
+                    args: {
+                        terminal: frm.doc.name
+                    },
+                    freeze: true,
+                    callback: (r) => {
+                        frappe.msgprint("Set Users to Terminal "+frm.doc.name);
+                    },
+                    error: (r) => {
+                        frappe.msgprint("Error : "+frm.doc.name);
+                    }
+                })                    
+            },
+            function(){
+                window.close();
+            }
+        )
+    }, __(menu_name));
+}
+
+function addBtnGetUsers(frm,menu_name) {
+    frm.add_custom_button(__("Get Users"), function() {
+        frappe.confirm(
+            'Are you sure to Get Users from Terminal "'+frm.doc.name+'"?',
+            function(){
+                window.close();
+
+                frappe.call({
+                    method: 'thai_zkt.thai_zkt.doctype.zk_terminal.zk_terminal.upload_terminal_user',
+                    args: {
+                        terminal: frm.doc.name
+                    },
+                    freeze: true,
+                    callback: (r) => {
+                        frappe.msgprint("Clear Users from Terminal "+frm.doc.name);
+                    },
+                    error: (r) => {
+                        frappe.msgprint("Error : "+frm.doc.name);
+                    }
+                })                    
+            },
+            function(){
+                window.close();
+            }
+        )
+    }, __(menu_name));
+}
+
 frappe.ui.form.on("ZK Terminal", {
     
  	onload(frm) {
@@ -51,61 +153,13 @@ frappe.ui.form.on("ZK Terminal", {
     },
 
     refresh:function(frm) {
-        frm.add_custom_button(__("Clear"), function() {
-            frappe.confirm(
-                'Are you sure to Clear User in Terminal "'+frm.doc.name+'"?',
-                function(){
-                    window.close();
 
-                    frappe.call({
-                        method: 'thai_zkt.thai_zkt.doctype.zk_terminal.zk_terminal.clear_terminal_user',
-                        args: {
-                            terminal: frm.doc.name
-                        },
-                        freeze: true,
-                        callback: (r) => {
-                            frappe.msgprint("Clear Terminal "+frm.doc.name);
-                        },
-                        error: (r) => {
-                            frappe.msgprint("Error Clear Terminal "+frm.doc.name);
-                        }
-                    })                    
-                },
-                function(){
-                    window.close();
-                }
-            )
-        }, __("User"));
+        menu_name = "Direct Command"
 
-        frm.add_custom_button(__("Download to Terminal"), function() {
-            frappe.confirm(
-                'Are you sure to Download User to Terminal "'+frm.doc.name+'"?',
-                function(){
-                    window.close();
-
-                    frappe.call({
-                        method: 'thai_zkt.thai_zkt.doctype.zk_terminal.zk_terminal.download_terminal_user',
-                        args: {
-                            terminal: frm.doc.name
-                        },
-                        freeze: true,
-                        callback: (r) => {
-                            frappe.msgprint("Download to Terminal "+frm.doc.name);
-                        },
-                        error: (r) => {
-                            frappe.msgprint("Error Download to Terminal "+frm.doc.name);
-                        }
-                    })                    
-                },
-                function(){
-                    window.close();
-                }
-            )
-        }, __("User"));
-
-        frm.add_custom_button(__("Upload to Server"), function() {
-            frappe.msgprint(frm.doc.name);
-        }, __("User"));
+        addBtnGetInfo(frm,menu_name);
+        addBtnClearUsers(frm,menu_name);
+        addBtnSetUsers(frm,menu_name);
+        addBtnGetUsers(frm,menu_name);
     }
 
 });

@@ -4,6 +4,10 @@ import thai_zkt.www.iclock.utils as utils
 import thai_zkt.www.iclock.service as service
 import json
 
+CMD_GET_INFO = "INFO"
+CMD_CLEAR_USERS = "DATA DELETE USERINFO"
+CMD_GET_USERS = "CHECK"
+CMD_SET_USERS = "_UPDATE"
 
 def handle_cdata_get(args):
     

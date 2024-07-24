@@ -81,8 +81,11 @@ mit
 - [X] ZK Terminal Page
     - [X] Clear Users in ZK Terminal
     - [X] Download Users to ZK Terminal
-    - [ ] Upload Users to Server
-    - [ ] Restore Users to ZK Terminal
+    - [X] Upload Users to Server
+    - [ ] Main ZK Terminal : Sync User
+        - [ ] Add User
+        - [ ] Update User
+        - [ ] Delete User
     - [ ] Log
 - [X] ZK User Page
 - [X] ZK Command Page

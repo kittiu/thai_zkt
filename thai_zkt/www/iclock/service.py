@@ -7,7 +7,9 @@ import json
 import logging
 import datetime
 from logging.handlers import RotatingFileHandler
-from urllib.parse import urlparse, parse_qs, urlencode
+import thai_zkt.www.iclock.push_protocol_2 as push2
+import thai_zkt.www.iclock.push_protocol_3 as push3
+
 
 EMPLOYEE_NOT_FOUND_ERROR_MESSAGE = "No Employee found for the given employee field value"
 EMPLOYEE_INACTIVE_ERROR_MESSAGE = "Transactions cannot be created for an Inactive Employee"
@@ -569,3 +571,17 @@ def do_set_terminal_options(serial_number, options):
         error_str = utils.safe_get_error_str(response)
         print('\t'.join(['Error during ERPNext API Call.', str(serial_number), str(options),  error_str]))
         return response.status_code, error_str
+
+
+def get_push_protocol(serial_number):
+    
+    code, terminal = get_terminal(serial_number)
+    
+    if terminal["push_version"].startswith("3"):
+        print(serial_number,": Push Protocol V.3")
+        push = push3
+    else:
+        print(serial_number,": Push Protocol V.2")
+        push = push2
+    
+    return push
