@@ -63,7 +63,7 @@ def get_command(serial_number):
 			.select(dt_ZKCommand.name, dt_ZKCommand.command)
 			.where(dt_ZKCommand.terminal == serial_number)
 			.where(dt_ZKCommand.status == "Create")
-   			.where(dt_ZKCommand.command.like("_%"))
+   			.where(dt_ZKCommand.command.like("\_%"))
 			.limit(1)
 	).run(as_dict=True)
 
@@ -85,13 +85,12 @@ def get_command(serial_number):
 			elif erpnext_status_code == 404:
 				ret_msg = "ERR:Command '" + cmd_id + "' does not exist!"
 			else:
-				ret_msg = "Err:" + str(erpnext_status_code) + ":" + erpnext_message
+				ret_msg = "ERR:" + str(erpnext_status_code) + ":" + erpnext_message
 		except frappe.DoesNotExistError:
 			ret_msg = "ERR:Command '" + cmd_id + "' does not exist!"
 		except Exception as e:
 			logger.exception('ERR:' + str(e))
 			ret_msg = "ERROR"
-
 
 	if ret_msg != "OK":
 		return ret_msg
@@ -105,35 +104,43 @@ def get_command(serial_number):
 			.select(dt_ZKCommand.name, dt_ZKCommand.command)
 			.where(dt_ZKCommand.terminal == serial_number)
 			.where(dt_ZKCommand.status == "Create")
-			.limit(30)
+			.limit(60)
 	).run(as_dict=True)
 
 	print("Normal cmds:",cmds)
  
 	cmd_id = None
+	cmd_id_list = []
 	for d_ZKCommand in cmds:
 		cmd_id = d_ZKCommand.name
 		print("ZK Command.id:",cmd_id,",",d_ZKCommand.command)
   
 		if d_ZKCommand.command.startswith("_"):
 			continue
+
+		if ret_msg=="OK":
+			ret_msg = ""
+		ret_msg += 'C:' + str(cmd_id) + ':' + d_ZKCommand.command + '\n'
+
+		cmd_id_list.append(cmd_id)
    
-		#set ZK Command status to 'Sent'
-		erpnext_status_code, erpnext_message = service.update_command_status(cmd_id, "Sent")
-		try:
-			if erpnext_status_code == 200:
-				if ret_msg=="OK":
-					ret_msg = ""
-				ret_msg += 'C:' + str(cmd_id) + ':' + d_ZKCommand.command + '\n'
-			elif erpnext_status_code == 404:
-				ret_msg = "ERR:Command '" + cmd_id + "' does not exist!"
-			else:
-				ret_msg = "Err:" + str(erpnext_status_code) + ":" + erpnext_message
-		except frappe.DoesNotExistError:
-			ret_msg = "ERR:Command '" + cmd_id + "' does not exist!"
-		except Exception as e:
-			logger.exception('ERR:' + str(e))
-			ret_msg = "ERROR"
+	if ret_msg=="OK":
+		return ret_msg
+
+	#set ZK Command status to 'Sent'
+	erpnext_status_code, erpnext_message = service.update_command_list_status(cmd_id_list, "Sent")
+	try:
+		if erpnext_status_code == 200:
+			print("cur:",ret_msg)
+		elif erpnext_status_code == 404:
+			ret_msg = "ERR:Command '" + cmd_id_list + "' does not exist!"
+		else:
+			ret_msg = "ERR:" + str(erpnext_status_code) + ":" + erpnext_message
+	except frappe.DoesNotExistError:
+		ret_msg = "ERR:Command '" + cmd_id_list + "' does not exist!"
+	except Exception as e:
+		logger.exception('ERR:' + str(e))
+		ret_msg = "ERROR"
 
 	return ret_msg
 

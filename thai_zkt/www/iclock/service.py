@@ -22,6 +22,30 @@ if hasattr(config,'allowed_exceptions'):
         allowlisted_errors_temp.append(allowlisted_errors[error_number-1])
     allowlisted_errors = allowlisted_errors_temp
 
+def update_command_list_status(cmd_id_list, status):
+    """
+    Example: update_command_list_status([1,2,3], "Sent")
+    """
+    
+    url = f"{config.ERPNEXT_URL}/api/method/thai_zkt.api.update_command_list_status"
+    headers = utils.get_headers()
+    data = {
+        "cmd_id_list":cmd_id_list,
+        "status":status
+    }
+
+    print("data:",data)
+
+    response = requests.request("POST", url, headers=headers, json=data)
+    if response.status_code == 200:
+        #print("response.content",response._content)
+        return 200, "OK"
+    else:
+        error_str = utils.safe_get_error_str(response)
+        print('\t'.join(['Error during API Call.', str(cmd_id_list), str(status),  error_str]))
+        return response.status_code, error_str
+
+
 def update_command_status(cmd_id, status):
     """
     Example: update_command_status(1, "Sent")
@@ -45,7 +69,7 @@ def update_command_status(cmd_id, status):
 
     response = requests.request("PUT", url, headers=headers, json=data)
     if response.status_code == 200:
-        print("response.content",response._content)
+        #print("response.content",response._content)
         return 200, json.loads(response._content)['data']['name']
     else:
         error_str = utils.safe_get_error_str(response)
@@ -121,7 +145,7 @@ def save_terminal(serial_number, info):
 
     response = requests.request("PUT", url, headers=headers, json=data)
     if response.status_code == 200:
-        print("response.content",response._content)
+        #print("response.content",response._content)
         return 200, json.loads(response._content)['data']['name']
     else:
         error_str = utils.safe_get_error_str(response)
@@ -177,7 +201,7 @@ def delete_terminal_option(serial_number):
 
     response = requests.request("POST", url, headers=headers, json=data)
     if response.status_code == 200:
-        print("response.content",response._content)
+        #print("response.content",response._content)
         return 200, response._content
     else:
         error_str = utils.safe_get_error_str(response)
@@ -283,7 +307,7 @@ def update_terminal_last_activity(serial_number):
 
     response = requests.request("PUT", url, headers=headers, json=data)
     if response.status_code == 200:
-        print("response.content",response._content)
+        #print("response.content",response._content)
         return 200, json.loads(response._content)['data']['name']
     else:
         error_str = utils.safe_get_error_str(response)
@@ -308,7 +332,7 @@ def create_user(user_id, user_name, user_pri, user_password, user_grp, pin):
     
     response = requests.request("POST", url, headers=headers, json=data)
     if response.status_code == 200:
-        print("response.content",response._content)
+        #print("response.content",response._content)
         return 200, json.loads(response._content)['data']['id']
     else:
         error_str = utils.safe_get_error_str(response)
@@ -337,7 +361,7 @@ def create_bio_data(zk_user, type, no, index, valid, format, major_version, mino
     
     response = requests.request("POST", url, headers=headers, json=data)
     if response.status_code == 200:
-        print("response.content",response._content)
+        #print("response.content",response._content)
 
         return 200, json.loads(response._content)['data']['name']
     else:
@@ -365,7 +389,7 @@ def create_bio_photo(zk_user, type, no, index, file_name, size, content):
     
     response = requests.request("POST", url, headers=headers, json=data)
     if response.status_code == 200:
-        print("response.content",response._content)
+        #print("response.content",response._content)
 
         return 200, json.loads(response._content)['data']['name']
     else:
@@ -379,7 +403,7 @@ def list_user(search_term = None):
     Example: list_user('CBE13422349')
     """
     fields = 'fields=["id","user_name","password","privilege","group","uid"]'
-    url = f'{config.ERPNEXT_URL}/api/resource/ZK User?{fields}&limit_start=0&limit=300'
+    url = f'{config.ERPNEXT_URL}/api/resource/ZK User?{fields}&limit_start=0&limit=500'
     headers = utils.get_headers()
     
     #if search_term:
@@ -565,7 +589,7 @@ def do_set_terminal_options(serial_number, options):
 
     response = requests.request("PUT", url, headers=headers, json=data)
     if response.status_code == 200:
-        print("response.content",response._content)
+        #print("response.content",response._content)
         return 200, json.loads(response._content)['data']['serial_number']
     else:
         error_str = utils.safe_get_error_str(response)
