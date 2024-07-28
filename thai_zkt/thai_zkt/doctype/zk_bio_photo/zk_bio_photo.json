@@ -1,5 +1,6 @@
 {
  "actions": [],
+ "allow_import": 1,
  "autoname": "autoincrement",
  "creation": "2024-07-21 18:28:26.397170",
  "doctype": "DocType",
@@ -53,7 +54,7 @@
  ],
  "index_web_pages_for_search": 1,
  "links": [],
- "modified": "2024-07-21 18:33:41.930668",
+ "modified": "2024-07-27 13:46:57.287575",
  "modified_by": "Administrator",
  "module": "Thai ZKT",
  "name": "ZK Bio Photo",

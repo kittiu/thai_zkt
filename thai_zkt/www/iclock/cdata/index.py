@@ -65,10 +65,12 @@ def get_context(context):
 		table = utils.get_arg(args,'table')
 		stamp = utils.get_arg(args,'Stamp')
 		opstamp = utils.get_arg(args,'OpStamp')
+		tablename = utils.get_arg(args,'tablename')
 
 		print("Table:",table)
 		print("Stamp:",stamp)
 		print("OpStamp:",opstamp)
+		print("tablename:",tablename)
 
 		data = request.get_data(True,True)
 		print("data:",data)
@@ -94,7 +96,7 @@ def get_context(context):
 
 
 
-		elif table == "ATTLOG":
+		elif table == "ATTLOG": # push protocol v.2
 			lines = data.split("\n")
 			print("lines:",lines)
 
@@ -172,7 +174,7 @@ def get_context(context):
   
   
   
-		elif table == "OPERLOG":
+		elif table == "OPERLOG": # push protocol v.2
 
 			lines = data.split("\n")
 			print("lines:",lines)
@@ -226,7 +228,7 @@ def get_context(context):
 
 
 
-		elif table == "BIODATA":
+		elif table == "BIODATA": # push protocol v.2
 
 			lines = data.split("\n")
 			print("lines:",lines)
@@ -264,7 +266,7 @@ def get_context(context):
 			if template_cnt > 0:
 				ret_msg = "OK:" + str(template_cnt) + "\n"
 
-		elif table == "rtlog":
+		elif table == "rtlog": # push protocol v.3
 
 			words = data.split("\t")
 			print("words:",words)
@@ -340,6 +342,38 @@ def get_context(context):
 					if not(any(error in erpnext_message for error in service.allowlisted_errors)):
 						raise Exception('API Call to ERPNext Failed.')
       
+		elif table == "tabledata" and tablename == "user": # push protocol v.3
+
+			lines = data.split("\n")
+			print("lines:",lines)
+
+			item_cnt = 0
+   
+			for line in lines:
+				words = line.split("\t")
+				print("words:",words)
+
+				if words[0].startswith("user"):
+					kv = words[0].split("=")
+					user_id = kv[1]
+					kv = words[2].split("=")
+					pin = kv[1]
+					kv = words[3].split("=")
+					user_password = kv[1]
+					kv = words[4].split("=")
+					user_grp = kv[1]
+					kv = words[7].split("=")
+					user_name = kv[1]
+					kv = words[8].split("=")
+					user_pri = kv[1]
+     
+					erpnext_status_code, erpnext_message = service.create_user(pin, user_name, user_pri, user_password, user_grp, user_id)
+					if erpnext_status_code == 200:
+						item_cnt += 1
+
+			if item_cnt > 0:
+				ret_msg = "OK:" + str(item_cnt) + "\n"
+    
 		else:
 
 			lines = data.split("\n")

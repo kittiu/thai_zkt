@@ -379,7 +379,7 @@ def list_user(search_term = None):
     Example: list_user('CBE13422349')
     """
     fields = 'fields=["id","user_name","password","privilege","group","uid"]'
-    url = f'{config.ERPNEXT_URL}/api/resource/ZK User?{fields}'
+    url = f'{config.ERPNEXT_URL}/api/resource/ZK User?{fields}&limit_start=0&limit=300'
     headers = utils.get_headers()
     
     #if search_term:

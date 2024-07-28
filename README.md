@@ -21,6 +21,7 @@ mit
 - Last Activity
 - Registry Code
 - Options
+- Is Main
 
 
 ##### ZK Terminal Option
@@ -39,6 +40,7 @@ mit
 - Privilege
 - Group
 - UID
+- Main Status
 
 ##### ZK Bio Data
 

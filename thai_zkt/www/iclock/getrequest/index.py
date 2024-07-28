@@ -3,7 +3,6 @@ from asyncio.log import logger
 from urllib.parse import urlparse, parse_qs
 import thai_zkt.www.iclock.utils as utils
 import thai_zkt.www.iclock.service as service
-import thai_zkt.www.iclock.push_protocol_2 as push2
 import thai_zkt.www.iclock.push_protocol_3 as push3
 
 no_cache = 1
@@ -55,30 +54,77 @@ def get_command(serial_number):
  
 	code, terminal = service.get_terminal(serial_number)
 
+	"""
+	Special Command
+	"""
 	dt_ZKCommand = frappe.qb.DocType('ZK Command')
 	cmds = (
 		frappe.qb.from_(dt_ZKCommand)
 			.select(dt_ZKCommand.name, dt_ZKCommand.command)
 			.where(dt_ZKCommand.terminal == serial_number)
 			.where(dt_ZKCommand.status == "Create")
+   			.where(dt_ZKCommand.command.like("_%"))
+			.limit(1)
 	).run(as_dict=True)
 
-	print("cmds:",cmds)
+	print("Special cmds:",cmds)
+ 
+	cmd_id = None
+	for d_ZKCommand in cmds:
+		cmd_id = d_ZKCommand.name
+		print("ZK Command.id:",cmd_id,",",d_ZKCommand.command)
 
+		ret_msg = get_special_command(serial_number, cmd_id, d_ZKCommand.command, terminal)
+  
+  		#set ZK Command status to 'Sent'
+		erpnext_status_code, erpnext_message = service.update_command_status(cmd_id, "Sent")
+		try:
+			if erpnext_status_code == 200:
+				if ret_msg=="OK":
+					ret_msg = 'C:' + str(cmd_id) + ':' + d_ZKCommand.command + '\n'
+			elif erpnext_status_code == 404:
+				ret_msg = "ERR:Command '" + cmd_id + "' does not exist!"
+			else:
+				ret_msg = "Err:" + str(erpnext_status_code) + ":" + erpnext_message
+		except frappe.DoesNotExistError:
+			ret_msg = "ERR:Command '" + cmd_id + "' does not exist!"
+		except Exception as e:
+			logger.exception('ERR:' + str(e))
+			ret_msg = "ERROR"
+
+
+	if ret_msg != "OK":
+		return ret_msg
+
+	"""
+	Normal Command
+	"""
+	dt_ZKCommand = frappe.qb.DocType('ZK Command')
+	cmds = (
+		frappe.qb.from_(dt_ZKCommand)
+			.select(dt_ZKCommand.name, dt_ZKCommand.command)
+			.where(dt_ZKCommand.terminal == serial_number)
+			.where(dt_ZKCommand.status == "Create")
+			.limit(30)
+	).run(as_dict=True)
+
+	print("Normal cmds:",cmds)
+ 
 	cmd_id = None
 	for d_ZKCommand in cmds:
 		cmd_id = d_ZKCommand.name
 		print("ZK Command.id:",cmd_id,",",d_ZKCommand.command)
   
 		if d_ZKCommand.command.startswith("_"):
-			ret_msg = get_special_command(serial_number, cmd_id, d_ZKCommand.command, terminal)
-
+			continue
+   
 		#set ZK Command status to 'Sent'
 		erpnext_status_code, erpnext_message = service.update_command_status(cmd_id, "Sent")
 		try:
 			if erpnext_status_code == 200:
 				if ret_msg=="OK":
-					ret_msg = 'C:' + str(cmd_id) + ':' + d_ZKCommand.command + '\n'
+					ret_msg = ""
+				ret_msg += 'C:' + str(cmd_id) + ':' + d_ZKCommand.command + '\n'
 			elif erpnext_status_code == 404:
 				ret_msg = "ERR:Command '" + cmd_id + "' does not exist!"
 			else:
@@ -96,90 +142,7 @@ def get_special_command(serial_number, cmd_id, cmd, terminal):
     
 	ret_msg = "OK"
     
-	if cmd == "_UPDATE":
-		# loop ZK User
-		#   create new command 'UPDATE USERINFO'
-		#   if exists ZK Bio Data
-		#     create new command 'UPDATE BIODATA'
-  
-		try:
-			erpnext_status_code, erpnext_message = service.list_user()
-			if erpnext_status_code == 200:
-       
-				users = erpnext_message
-    
-				if len(users) > 0:
-					ret_msg = ""
-
-
-				if terminal["push_version"].startswith("3"):
-					push = push3
-				else:
-					push = push2
-
-				for user in users:
-					cmd_line = push.get_cmd_update_user(user)
-					status, new_cmd_id = service.create_command(serial_number, cmd_line, 'Sent')
-					
-					ret_msg += 'C:' + str(new_cmd_id) + ':' + cmd_line + '\n'
-
-					#create UPDATE BIODATA command
-					try:
-						erpnext_status_code, erpnext_message = service.list_biodata(user["id"])
-						if erpnext_status_code == 200:
-				
-							biodata = erpnext_message
-				
-							for data in biodata:
-								cmd_line = push.get_cmd_update_biodata(data)
-								status, new_cmd_id = service.create_command(serial_number, cmd_line, 'Sent')
-								
-								ret_msg += 'C:' + str(new_cmd_id) + ':' + cmd_line + '\n'
-				
-						elif erpnext_status_code == 404:
-							ret_msg = "ERR:ZK Bio Data of User '" + user["id"] + "' does not exist!"
-						else:
-							ret_msg = "Err:" + str(erpnext_status_code) + ":" + erpnext_message
-					except frappe.DoesNotExistError:
-						ret_msg = "ERR:ZK Bio Data of User '" + user["id"] + "' does not exist!"
-					except Exception as e:
-						logger.exception('ERR:' + str(e))
-						ret_msg = "ERROR"
-      
-					#create UPDATE BIOPHOTO command
-					try:
-						erpnext_status_code, erpnext_message = service.list_biophoto(user["id"])
-						if erpnext_status_code == 200:
-				
-							biophoto = erpnext_message
-				
-							for data in biophoto:
-								cmd_line = push.get_cmd_update_biophoto(data)
-								status, new_cmd_id = service.create_command(serial_number, cmd_line, 'Sent')
-								
-								ret_msg += 'C:' + str(new_cmd_id) + ':' + cmd_line + '\n'
-				
-						elif erpnext_status_code == 404:
-							ret_msg = "ERR:ZK Bio Photo of User '" + user["id"] + "' does not exist!"
-						else:
-							ret_msg = "Err:" + str(erpnext_status_code) + ":" + erpnext_message
-					except frappe.DoesNotExistError:
-						ret_msg = "ERR:ZK Bio Phot of User '" + user["id"] + "' does not exist!"
-					except Exception as e:
-						logger.exception('ERR:' + str(e))
-						ret_msg = "ERROR"
-      
-			elif erpnext_status_code == 404:
-				ret_msg = "ERR:ZK User does not exist!"
-			else:
-				ret_msg = "Err:" + str(erpnext_status_code) + ":" + erpnext_message
-		except frappe.DoesNotExistError:
-			ret_msg = "ERR:ZK User does not exist!"
-		except Exception as e:
-			logger.exception('ERR:' + str(e))
-			ret_msg = "ERROR"
-
-	elif cmd == "_CHECK":
+	if cmd == "_CHECK":
 		ret_msg = push3.cmd_check(serial_number)
   
 	elif cmd == "_GET_OPTIONS":

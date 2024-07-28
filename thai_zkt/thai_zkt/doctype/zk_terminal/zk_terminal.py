@@ -31,22 +31,21 @@ def clear_terminal_user(terminal):
 
 
 @frappe.whitelist()
-def download_terminal_user(terminal):
-    
-    push = service.get_push_protocol(terminal)
-    
-    cmd = frappe.get_doc({"doctype":"ZK Command", "terminal":terminal, "command":push.CMD_SET_USERS})
-    cmd.insert()
-    
-    return "OK"
-
-
-@frappe.whitelist()
 def upload_terminal_user(terminal):
     
     push = service.get_push_protocol(terminal)
     
     cmd = frappe.get_doc({"doctype":"ZK Command", "terminal":terminal, "command":push.CMD_GET_USERS})
     cmd.insert()
+    
+    return "OK"
+
+
+@frappe.whitelist()
+def download_terminal_user(terminal):
+    
+    push = service.get_push_protocol(terminal)
+    
+    push.gen_download_user_cmds(terminal)
     
     return "OK"

@@ -1,5 +1,6 @@
 {
  "actions": [],
+ "allow_import": 1,
  "allow_rename": 1,
  "autoname": "field:id",
  "creation": "2024-07-01 18:33:18.920401",
@@ -11,7 +12,8 @@
   "password",
   "privilege",
   "group",
-  "uid"
+  "uid",
+  "main_status"
  ],
  "fields": [
   {
@@ -46,11 +48,19 @@
    "fieldname": "uid",
    "fieldtype": "Data",
    "label": "UID"
+  },
+  {
+   "default": "Add",
+   "fieldname": "main_status",
+   "fieldtype": "Data",
+   "label": "Main Status",
+   "options": "Sync\nAdd\nDelete",
+   "reqd": 1
   }
  ],
  "index_web_pages_for_search": 1,
  "links": [],
- "modified": "2024-07-20 06:21:33.539187",
+ "modified": "2024-07-27 13:46:41.908649",
  "modified_by": "Administrator",
  "module": "Thai ZKT",
  "name": "ZK User",
