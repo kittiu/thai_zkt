@@ -516,6 +516,28 @@ def create_command(terminal, command, status):
             print('\t'.join(['Error during ERPNext API Call.', str(id), str(terminal), str(command), str(status), error_str]))
         return response.status_code, error_str
     
+def get_options_dict(data):
+    lines = data.split(",")
+
+    # resolve "~OEMVendor=ZKTECO CO., LTD." (Comma is inside company name)
+    finallines = []
+    idx = 0
+    for line in lines:
+        if len(line)>0:
+            if "=" in line:
+                finallines.append(line)
+                idx += 1
+            else:
+                finallines[idx-1] = finallines[idx-1] + "," + line
+
+    options = {}
+    for ldx, line in enumerate(finallines):
+        if len(line)>0:
+            words = line.split("=")
+            options[words[0]] = words[1]
+
+    return options
+
     
 def set_terminal_options(serial_number, options):
 
@@ -536,7 +558,15 @@ def set_terminal_options(serial_number, options):
         logger.exception('ERR:' + str(e))
         ret_msg = "ERROR"
         
-    options = old_options + options
+    old_options_dict = get_options_dict(old_options)
+    options_dict = get_options_dict(options)
+    
+    for key in options_dict:
+        old_options_dict[key] = options_dict[key]
+    
+    options = ""
+    for key in old_options_dict:
+        options += key + "=" + old_options_dict[key] + ","
 
     if ret_msg == "OK":
         # set ZK Terminal options

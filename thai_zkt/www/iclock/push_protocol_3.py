@@ -140,12 +140,6 @@ def cmd_check(serial_number):
 def handle_querydata_post_options(serial_number,data):
     ret_msg = "OK"
     
-    #TODO loop data
-        # if exists
-            # update
-        # else
-            # add
-            
     ret_msg = service.set_terminal_options(serial_number,data)
     
     return ret_msg
