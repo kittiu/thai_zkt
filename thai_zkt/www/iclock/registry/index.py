@@ -50,7 +50,6 @@ def get_context(context):
 		# process args and data
 		ret_msg = service.update_terminal_info(serial_number, info)
 		if ret_msg == "OK":
-			#ret_msg = service.update_terminal_option(serial_number, info)
 			ret_msg = service.set_terminal_options(serial_number, data)
 
 		if ret_msg == "OK":

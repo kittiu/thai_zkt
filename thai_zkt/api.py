@@ -3,16 +3,6 @@ import datetime
 from frappe.query_builder import Criterion
 
 @frappe.whitelist(methods=["POST"])
-def delete_terminal_option(zk_terminal):
-    
-    frappe.db.delete("ZK Terminal Option", {
-        "zk_terminal": zk_terminal
-    })
-    
-    return "OK"
-
-
-@frappe.whitelist(methods=["POST"])
 def update_command_list_status(cmd_id_list, status):
     
     dt_ZKCommand = frappe.qb.DocType('ZK Command')

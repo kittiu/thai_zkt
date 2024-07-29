@@ -24,14 +24,6 @@ mit
 - Is Main
 
 
-##### ZK Terminal Option
-
-- Frappe "Name" (Autoincrement)
-- ZK Terminal (FK "ZK Terminal")
-- Option Name
-- Option Value
-
-
 ##### ZK User
 
 - ID (Frappe "Name") (ZKTeco 'pin')
