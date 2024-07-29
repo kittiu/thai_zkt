@@ -140,9 +140,14 @@ def gen_download_user_cmds(serial_number):
     return ret_msg
 
 
-def create_update_user_command(user, serial_number):
+def create_update_user_command(user, serial_number, add_after_done=False):
+    
+    after_done = ""
+    if add_after_done:
+        after_done = '{"action":"update_sync_terminal","pin":'+str(user.get("id"))+'}'
+    
     cmd_line = get_cmd_update_user(user)
-    status, new_cmd_id = service.create_command(serial_number, cmd_line, 'Create')
+    status, new_cmd_id = service.create_command(serial_number, cmd_line, 'Create', after_done)
     
     #create UPDATE BIODATA command
     try:
@@ -188,6 +193,11 @@ def create_update_user_command(user, serial_number):
 
 
 
-def create_delete_user_command(user, serial_number):
+def create_delete_user_command(user, serial_number, add_after_done=False):
+    
+    after_done = ""
+    if add_after_done:
+        after_done = '{"action":"update_sync_terminal","pin":'+str(user.get("id"))+'}'
+
     cmd_line = get_cmd_delete_user(str(user.get("id")))
-    status, new_cmd_id = service.create_command(serial_number, cmd_line, 'Create')
+    status, new_cmd_id = service.create_command(serial_number, cmd_line, 'Create', after_done)

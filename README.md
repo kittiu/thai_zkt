@@ -33,6 +33,7 @@ mit
 - Group
 - UID
 - Main Status
+- Sync Terminal
 
 ##### ZK Bio Data
 
@@ -66,6 +67,7 @@ mit
 - Status
 - Sent Time
 - Done Time
+- After Done
 
 
 #### TODO

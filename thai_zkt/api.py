@@ -23,3 +23,20 @@ def update_command_list_status(cmd_id_list, status):
     qb.where(dt_ZKCommand.id.isin(cmd_id_list)).run()
 
     return "OK"
+
+
+@frappe.whitelist(methods=["GET"])
+def count_terminal():
+    return frappe.db.count('ZK Terminal')
+
+
+@frappe.whitelist(methods=["DELETE"])
+def delete_user(pin):
+    
+    dt_ZKBioPhoto = frappe.qb.DocType('ZK Bio Photo')
+    qb = frappe.qb.from_(dt_ZKBioPhoto).where(dt_ZKBioPhoto.zk_user == pin).delete().run()
+
+    dt_ZKBioData = frappe.qb.DocType('ZK Bio Data')
+    qb = frappe.qb.from_(dt_ZKBioData).where(dt_ZKBioData.zk_user == pin).delete().run()
+
+    frappe.delete_doc("ZK User", pin)

@@ -196,7 +196,24 @@ def get_terminal(serial_number):
         else:
             print('\t'.join(['Error during ERPNext API Call.', str(serial_number), error_str]))
         return response.status_code, error_str
-
+    
+def get_command(id):
+    """
+    Example: get_command(1)
+    """
+    url = f"{config.ERPNEXT_URL}/api/resource/ZK Command/" + id
+    headers = utils.get_headers()
+    
+    response = requests.request("GET", url, headers=headers)
+    if response.status_code == 200:
+        return 200, json.loads(response._content)['data']
+    else:
+        error_str = utils.safe_get_error_str(response)
+        if EMPLOYEE_NOT_FOUND_ERROR_MESSAGE in error_str:
+            print('\t'.join(['Error during ERPNext API Call.', str(id), error_str]))
+        else:
+            print('\t'.join(['Error during ERPNext API Call.', str(id), error_str]))
+        return response.status_code, error_str    
 
 
 def setup_logger(name, log_file, level=logging.INFO, formatter=None):
@@ -414,7 +431,7 @@ def get_user(name):
 
 
 
-def create_command(terminal, command, status):
+def create_command(terminal, command, status, after_done=""):
     """
     Example: create_command(1,'CSE33412349', 'UPDATE USERINFO', 'Sent')
     """
@@ -426,6 +443,9 @@ def create_command(terminal, command, status):
         'command' : command,
         'status' : status
 	}
+    
+    if after_done:
+        data["after_done"] = after_done
     
     response = requests.request("POST", url, headers=headers, json=data)
     if response.status_code == 200:
@@ -507,25 +527,6 @@ def set_terminal_options(serial_number, options):
     return ret_msg
 
 
-def get_terminal(serial_number):
-    """
-    Example: get_terminal('CBE13422349')
-    """
-    url = f"{config.ERPNEXT_URL}/api/resource/ZK Terminal/" + serial_number
-    headers = utils.get_headers()
-    
-    response = requests.request("GET", url, headers=headers)
-    if response.status_code == 200:
-        return 200, json.loads(response._content)['data']
-    else:
-        error_str = utils.safe_get_error_str(response)
-        if EMPLOYEE_NOT_FOUND_ERROR_MESSAGE in error_str:
-            print('\t'.join(['Error during ERPNext API Call.', str(serial_number), error_str]))
-        else:
-            print('\t'.join(['Error during ERPNext API Call.', str(serial_number), error_str]))
-        return response.status_code, error_str
-
-
 def do_set_terminal_options(serial_number, options):
     """
     Example: do_set_terminal_options("CISK2239023", "~SerialNumber=CRJP234760207,FirmVer=ZMM510-NF24VB-Ver1.3.9,~DeviceName=SpeedFace-V3L/ID,LockCount=1,ReaderCount=2,AuxInCount=1,AuxOutCount=0,MachineType=101,~IsOnlyRFMachine=0,~MaxUserCount=30,~MaxAttLogCount=20")
@@ -561,3 +562,92 @@ def get_push_protocol(serial_number):
         push = push2
     
     return push
+
+def get_terminal_count():
+    url = f"{config.ERPNEXT_URL}/api/method/thai_zkt.api.count_terminal"
+    headers = utils.get_headers()
+    response = requests.request("GET", url, headers=headers)
+    if response.status_code == 200:
+        #print("response.content",response._content)
+        return 200, response.content
+    else:
+        error_str = utils.safe_get_error_str(response)
+        print('\t'.join(['Error during API Call.', error_str]))
+        return response.status_code, error_str
+
+
+def update_sync_terminal(pin, serial_number):
+    """
+    Example: update_sync_terminal(1,"CISK2239023")
+    """
+    code, message = get_user(pin)
+    if code == 200:
+        user = message
+        sync_terminal = user["sync_terminal"]
+        
+        finallines = []
+        lines = sync_terminal.split(",")
+        for line in lines:
+            if len(line)>0:
+                finallines.append(line)
+                
+        finallines.append(serial_number)
+        sync_terminal = ",".join(finallines)
+        
+        url = f"{config.ERPNEXT_URL}/api/resource/ZK User/{pin}"
+        headers = utils.get_headers()
+
+        """
+        Append Terminal to ZK User.sync_terminal
+        """
+        data = {
+            'sync_terminal' : sync_terminal
+        }
+        
+        code, message = get_terminal_count()
+        if code == 200:
+            terminal_count = json.loads(message)["message"]
+        
+        print("terminal_count:",terminal_count)
+        print("finallines:",finallines)
+        if len(finallines) == terminal_count:
+            if user["main_status"] == "Add":
+                print("Add => Sync")
+                """
+                Update ZK User.main_status to 'Sync'
+                """
+                data['main_status'] = 'Sync'
+                
+                print("data:",data)
+                
+                response = requests.request("PUT", url, headers=headers, json=data)
+                if response.status_code == 200:
+                    #print("response.content",response._content)
+                    return 200, json.loads(response._content)['data']['name']
+                else:
+                    error_str = utils.safe_get_error_str(response)
+                    print('\t'.join(['Error during ERPNext API Call.', str(pin), str(sync_terminal),  error_str]))
+                    return response.status_code, error_str
+                
+            elif user["main_status"] == "Pre Delete":
+                print("Pre Delete => Delete")
+                """
+                Delete ZK User
+                """
+                delete_user(pin)
+        
+        
+def delete_user(pin):
+    url = f"{config.ERPNEXT_URL}/api/method/thai_zkt.api.delete_user"
+    headers = utils.get_headers()
+    data = {
+        "pin":pin
+    }
+    response = requests.request("DELETE", url, headers=headers, json=data)
+    if response.status_code == 200:
+        #print("response.content",response._content)
+        return 200, response.content
+    else:
+        error_str = utils.safe_get_error_str(response)
+        print('\t'.join(['Error during API Call.', error_str]))
+        return response.status_code, error_str

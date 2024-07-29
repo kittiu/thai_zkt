@@ -3,6 +3,7 @@ import frappe
 from urllib.parse import urlparse, parse_qs
 import thai_zkt.www.iclock.utils as utils
 import thai_zkt.www.iclock.service as service
+import json
 
 no_cache = 1
 
@@ -51,6 +52,15 @@ def get_context(context):
 					try:
 						if erpnext_status_code == 200:
 							ret_msg = "OK"
+       
+							erpnext_status_code, erpnext_message = service.get_command(p_id)
+							if erpnext_status_code == 200:
+								command = erpnext_message
+								if command.get('after_done'):
+									after_done = json.loads(command.get('after_done'))
+									if after_done["action"] == "update_sync_terminal":
+										erpnext_status_code, erpnext_message = service.update_sync_terminal(after_done["pin"], serial_number)
+       
 						elif erpnext_status_code == 404:
 							ret_msg = "ERR:Command '" + p_id + "' does not exist!"
 						else:

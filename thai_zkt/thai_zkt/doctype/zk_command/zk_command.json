@@ -10,7 +10,8 @@
   "command",
   "status",
   "sent_time",
-  "done_time"
+  "done_time",
+  "after_done"
  ],
  "fields": [
   {
@@ -52,11 +53,16 @@
    "fieldname": "terminal_alias",
    "fieldtype": "Data",
    "label": "Terminal Alias"
+  },
+  {
+   "fieldname": "after_done",
+   "fieldtype": "Data",
+   "label": "After Done"
   }
  ],
  "index_web_pages_for_search": 1,
  "links": [],
- "modified": "2024-07-24 04:18:14.055311",
+ "modified": "2024-07-29 13:10:18.859530",
  "modified_by": "Administrator",
  "module": "Thai ZKT",
  "name": "ZK Command",

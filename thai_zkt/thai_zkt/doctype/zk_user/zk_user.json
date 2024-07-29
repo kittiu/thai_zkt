@@ -13,7 +13,8 @@
   "privilege",
   "group",
   "uid",
-  "main_status"
+  "main_status",
+  "sync_terminal"
  ],
  "fields": [
   {
@@ -54,13 +55,18 @@
    "fieldname": "main_status",
    "fieldtype": "Data",
    "label": "Main Status",
-   "options": "Sync\nAdd\nDelete",
+   "options": "Sync\nAdd\nPre Delete",
    "reqd": 1
+  },
+  {
+   "fieldname": "sync_terminal",
+   "fieldtype": "Long Text",
+   "label": "Sync Terminal"
   }
  ],
  "index_web_pages_for_search": 1,
  "links": [],
- "modified": "2024-07-27 13:46:41.908649",
+ "modified": "2024-07-29 13:38:59.809550",
  "modified_by": "Administrator",
  "module": "Thai ZKT",
  "name": "ZK User",

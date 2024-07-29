@@ -31,6 +31,9 @@ def sync(users):
 	user_id_list = json.loads(users)
  
 	dt_ZKUser = frappe.qb.DocType('ZK User')
+	qb = frappe.qb.update(dt_ZKUser).set(dt_ZKUser.sync_terminal, "")
+	qb.where(dt_ZKUser.id.isin(user_id_list)).run()
+ 
 	user_list = (
 		frappe.qb.from_(dt_ZKUser)
 			.select(dt_ZKUser.id, dt_ZKUser.user_name, dt_ZKUser.password, dt_ZKUser.privilege, dt_ZKUser.group, dt_ZKUser.main_status)
@@ -40,11 +43,25 @@ def sync(users):
 	for user in user_list:
 		if user.get("main_status") == "Add":
 			for terminal in terminals:
-				terminal.get("push").create_update_user_command(user, terminal.get("name"))
+				terminal.get("push").create_update_user_command(user, terminal.get("name"),True)
 				
-		elif user.get("main_status") == "Delete":
+		elif user.get("main_status") == "Pre Delete":
 			for terminal in terminals:
-				terminal.get("push").create_delete_user_command(user, terminal.get("name"))
+				terminal.get("push").create_delete_user_command(user, terminal.get("name"),True)
     
 	return "OK"
 
+
+
+@frappe.whitelist()
+def predelete(users):
+	print("predelete:",users)
+
+	user_id_list = json.loads(users)
+ 
+	dt_ZKUser = frappe.qb.DocType('ZK User')
+	qb = frappe.qb.update(dt_ZKUser).set(dt_ZKUser.main_status, "Pre Delete")
+    
+	qb.where(dt_ZKUser.id.isin(user_id_list)).run()
+
+	return "OK"
