@@ -120,7 +120,7 @@ function addBtnGetUsers(frm,menu_name) {
                     },
                     freeze: true,
                     callback: (r) => {
-                        frappe.msgprint("Clear Users from Terminal "+frm.doc.name);
+                        frappe.msgprint("Get Users from Terminal "+frm.doc.name);
                     },
                     error: (r) => {
                         frappe.msgprint("Error : "+frm.doc.name);

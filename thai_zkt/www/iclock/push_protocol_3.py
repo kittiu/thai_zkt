@@ -8,7 +8,6 @@ from asyncio.log import logger
 CMD_GET_INFO = "_GET_OPTIONS"
 CMD_CLEAR_USERS = "DATA DELETE user Pin=*"
 CMD_GET_USERS = "_CHECK"
-CMD_SET_USERS = "_UPDATE"
 
 def handle_cdata_get(args):
     
@@ -272,6 +271,9 @@ def get_cmd_update_biodata(data):
 def get_cmd_update_biophoto(data):
     return 'DATA UPDATE biophoto ' + encode_biophoto(data)
 
+def get_cmd_delete_user(user):
+    return 'DATA DELETE user Pin=' + user
+
 def encode_user(user):
     
     encode = "\t".join(["Cardno="
@@ -338,50 +340,7 @@ def gen_download_user_cmds(serial_number):
             users = erpnext_message
 
             for user in users:
-                cmd_line = get_cmd_update_user(user)
-                status, new_cmd_id = service.create_command(serial_number, cmd_line, 'Create')
-                
-                #create UPDATE BIODATA command
-                try:
-                    erpnext_status_code, erpnext_message = service.list_biodata(user["id"])
-                    if erpnext_status_code == 200:
-            
-                        biodata = erpnext_message
-            
-                        for data in biodata:
-                            cmd_line = get_cmd_update_biodata(data)
-                            status, new_cmd_id = service.create_command(serial_number, cmd_line, 'Create')
-            
-                    elif erpnext_status_code == 404:
-                        ret_msg = "ERR:ZK Bio Data of User '" + user["id"] + "' does not exist!"
-                    else:
-                        ret_msg = "ERR:" + str(erpnext_status_code) + ":" + erpnext_message
-                except frappe.DoesNotExistError:
-                    ret_msg = "ERR:ZK Bio Data of User '" + user["id"] + "' does not exist!"
-                except Exception as e:
-                    logger.exception('ERR:' + str(e))
-                    ret_msg = "ERROR"
-    
-                #create UPDATE BIOPHOTO command
-                try:
-                    erpnext_status_code, erpnext_message = service.list_biophoto(user["id"])
-                    if erpnext_status_code == 200:
-            
-                        biophoto = erpnext_message
-            
-                        for data in biophoto:
-                            cmd_line = get_cmd_update_biophoto(data)
-                            status, new_cmd_id = service.create_command(serial_number, cmd_line, 'Create')
-                            
-                    elif erpnext_status_code == 404:
-                        ret_msg = "ERR:ZK Bio Photo of User '" + user["id"] + "' does not exist!"
-                    else:
-                        ret_msg = "ERR:" + str(erpnext_status_code) + ":" + erpnext_message
-                except frappe.DoesNotExistError:
-                    ret_msg = "ERR:ZK Bio Photo of User '" + user["id"] + "' does not exist!"
-                except Exception as e:
-                    logger.exception('ERR:' + str(e))
-                    ret_msg = "ERROR"
+                create_update_user_command(user, serial_number)
     
         elif erpnext_status_code == 404:
             ret_msg = "ERR:ZK User does not exist!"
@@ -394,3 +353,59 @@ def gen_download_user_cmds(serial_number):
         ret_msg = "ERROR"
 
     return ret_msg
+
+
+def create_update_user_command(user, serial_number):
+    
+    cmd_line = get_cmd_update_user(user)
+    status, new_cmd_id = service.create_command(serial_number, cmd_line, 'Create')
+    
+    #create UPDATE BIODATA command
+    try:
+        erpnext_status_code, erpnext_message = service.list_biodata(user["id"])
+        if erpnext_status_code == 200:
+
+            biodata = erpnext_message
+
+            for data in biodata:
+                cmd_line = get_cmd_update_biodata(data)
+                status, new_cmd_id = service.create_command(serial_number, cmd_line, 'Create')
+
+        elif erpnext_status_code == 404:
+            ret_msg = "ERR:ZK Bio Data of User '" + user["id"] + "' does not exist!"
+        else:
+            ret_msg = "ERR:" + str(erpnext_status_code) + ":" + erpnext_message
+    except frappe.DoesNotExistError:
+        ret_msg = "ERR:ZK Bio Data of User '" + user["id"] + "' does not exist!"
+    except Exception as e:
+        logger.exception('ERR:' + str(e))
+        ret_msg = "ERROR"
+
+    #create UPDATE BIOPHOTO command
+    try:
+        erpnext_status_code, erpnext_message = service.list_biophoto(user["id"])
+        if erpnext_status_code == 200:
+
+            biophoto = erpnext_message
+
+            for data in biophoto:
+                cmd_line = get_cmd_update_biophoto(data)
+                status, new_cmd_id = service.create_command(serial_number, cmd_line, 'Create')
+                
+        elif erpnext_status_code == 404:
+            ret_msg = "ERR:ZK Bio Photo of User '" + user["id"] + "' does not exist!"
+        else:
+            ret_msg = "ERR:" + str(erpnext_status_code) + ":" + erpnext_message
+    except frappe.DoesNotExistError:
+        ret_msg = "ERR:ZK Bio Photo of User '" + user["id"] + "' does not exist!"
+    except Exception as e:
+        logger.exception('ERR:' + str(e))
+        ret_msg = "ERROR"
+
+
+
+def create_delete_user_command(user, serial_number):
+    
+    cmd_line = get_cmd_delete_user(str(user.get("id")))
+    status, new_cmd_id = service.create_command(serial_number, cmd_line, 'Create')
+    
