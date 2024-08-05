@@ -1,6 +1,7 @@
 # Push V.3
 import frappe
 from urllib.parse import urlparse, parse_qs
+import thai_zkt.www.iclock.service as service
 import thai_zkt.www.iclock.utils as utils
 import thai_zkt.www.iclock.push_protocol_3 as push3
 
@@ -38,14 +39,16 @@ def get_context(context):
    
 		elif type == "tabledata":
 	
+			is_main = service.is_main_terminal(serial_number)
+
 			tablename = utils.get_arg(args,'tablename')
 
 			if tablename == "user":
-				ret_msg = push3.handle_querydata_post_tabledata_user(data)
+				ret_msg = push3.handle_querydata_post_tabledata_user(is_main, data)
 			elif tablename == "biodata":
-				ret_msg = push3.handle_querydata_post_tabledata_biodata(data)
+				ret_msg = push3.handle_querydata_post_tabledata_biodata(is_main, data)
 			elif tablename == "biophoto":
-				ret_msg = push3.handle_querydata_post_tabledata_biophoto(data)
+				ret_msg = push3.handle_querydata_post_tabledata_biophoto(is_main, data)
 
 
 	# send msg back to terminal

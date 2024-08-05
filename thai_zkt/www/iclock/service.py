@@ -191,12 +191,10 @@ def get_terminal(serial_number):
         return 200, json.loads(response._content)['data']
     else:
         error_str = utils.safe_get_error_str(response)
-        if EMPLOYEE_NOT_FOUND_ERROR_MESSAGE in error_str:
-            print('\t'.join(['Error during ERPNext API Call.', str(serial_number), error_str]))
-        else:
-            print('\t'.join(['Error during ERPNext API Call.', str(serial_number), error_str]))
+        print('\t'.join(['Error during ERPNext API Call.', str(serial_number), error_str]))
         return response.status_code, error_str
-    
+
+
 def get_command(id):
     """
     Example: get_command(1)
@@ -209,10 +207,7 @@ def get_command(id):
         return 200, json.loads(response._content)['data']
     else:
         error_str = utils.safe_get_error_str(response)
-        if EMPLOYEE_NOT_FOUND_ERROR_MESSAGE in error_str:
-            print('\t'.join(['Error during ERPNext API Call.', str(id), error_str]))
-        else:
-            print('\t'.join(['Error during ERPNext API Call.', str(id), error_str]))
+        print('\t'.join(['Error during ERPNext API Call.', str(id), error_str]))
         return response.status_code, error_str    
 
 
@@ -253,7 +248,95 @@ def update_terminal_last_activity(serial_number):
         print('\t'.join(['Error during ERPNext API Call.', str(serial_number), now.__str__,  error_str]))
         return response.status_code, error_str
     
-def create_user(user_id, user_name, user_pri, user_password, user_grp, pin):
+def map_user_employee(pin, user_name):
+
+    fields = 'fields=["name","employee_name"]'
+    filters = f'filters=[["employee_name","=","{user_name}"]]'
+    url = f'{config.ERPNEXT_URL}/api/resource/Employee?{fields}&{filters}'
+    headers = utils.get_headers()
+    
+    response = requests.request("GET", url=url, headers=headers)
+
+    print("response.status_code:{}".format(response.status_code))
+    if response.status_code == 200:
+        print("==================================")
+        print("response._content:",response._content)
+        print("==================================")
+
+        employees = json.loads(response._content)['data']
+        for employee in employees:
+            do_map_user_employee(employee, pin)
+
+        return 200, employees
+    else:
+        error_str = utils.safe_get_error_str(response)
+        print('\t'.join(['Error during ERPNext API Call.', str(pin), user_name, error_str]))
+        return response.status_code, error_str
+
+
+def do_map_user_employee(employee, pin):
+    """
+    Example: do_map_user_employee('HR-EMP-0001',1)
+    """
+    url = f"{config.ERPNEXT_URL}/api/resource/Employee/" + employee['name']
+    headers = utils.get_headers()
+
+    data = {
+        'attendance_device_id' : str(pin)
+	}
+
+    response = requests.request("PUT", url, headers=headers, json=data)
+    if response.status_code == 200:
+        #print("response.content",response._content)
+        return 200, json.loads(response._content)['data']['name']
+    else:
+        error_str = utils.safe_get_error_str(response)
+        print('\t'.join(['Error during ERPNext API Call.', employee['name'], employee['employee_name'], str(pin),  error_str]))
+        return response.status_code, error_str
+
+
+def save_user(pin, user_name, user_pri, user_password, user_grp):
+    #if exists user
+    #	update zk user
+    #else
+    #	create zk user
+    erpnext_status_code, erpnext_message = get_user(pin)
+    if erpnext_status_code == 200:
+        erpnext_status_code, erpnext_message = update_user(pin, user_name, user_pri, user_password, user_grp)
+    else:
+        erpnext_status_code, erpnext_message = create_user(pin, user_name, user_pri, user_password, user_grp)
+
+    if erpnext_status_code == 200:
+        map_user_employee(pin, user_name)
+
+    return erpnext_status_code, erpnext_message
+
+
+def update_user(user_id, user_name, user_pri, user_password, user_grp):
+    """
+    Example: update_user('1','Roger Power', '1', 'abc', '1')
+    """
+    url = f"{config.ERPNEXT_URL}/api/resource/ZK User/{user_id}"
+    headers = utils.get_headers()
+
+    data = {
+        'user_name' : user_name,
+        'password' : user_password,
+        'privilege' : user_pri,
+        'group' : user_grp
+	}
+    
+    response = requests.request("PUT", url, headers=headers, json=data)
+    if response.status_code == 200:
+        #print("response.content",response._content)
+        return 200, json.loads(response._content)['data']['id']
+    else:
+        error_str = utils.safe_get_error_str(response)
+        print('\t'.join(['Error during ERPNext API Call.', str(id), str(user_name),  error_str]))
+        return response.status_code, error_str
+
+
+def create_user(user_id, user_name, user_pri, user_password, user_grp):
     """
     Example: create_user('1','Roger Power', '1', 'abc', '1')
     """
@@ -265,8 +348,7 @@ def create_user(user_id, user_name, user_pri, user_password, user_grp, pin):
         'user_name' : user_name,
         'password' : user_password,
         'privilege' : user_pri,
-        'group' : user_grp,
-        'pin' : pin
+        'group' : user_grp
 	}
     
     response = requests.request("POST", url, headers=headers, json=data)
@@ -277,11 +359,58 @@ def create_user(user_id, user_name, user_pri, user_password, user_grp, pin):
         error_str = utils.safe_get_error_str(response)
         print('\t'.join(['Error during ERPNext API Call.', str(id), str(user_name),  error_str]))
         return response.status_code, error_str
+
+
+def save_bio_data(zk_user, type, no, index, valid, format, major_version, minor_version, template):
+    #if exists bio data
+    #	update zk bio data
+    #else
+    #	create zk bio data
+    erpnext_status_code, erpnext_message = get_bio_data(zk_user, type, no, index)
+    if erpnext_status_code == 200:
+        biodatas = erpnext_message
+        if len(biodatas)>0:
+            biodata = biodatas[0]
+            erpnext_status_code, erpnext_message = update_bio_data(biodata['name'], zk_user, type, no, index, valid, format, major_version, minor_version, template)
+        else:
+            erpnext_status_code, erpnext_message = create_bio_data(zk_user, type, no, index, valid, format, major_version, minor_version, template)
+
+    return erpnext_status_code, erpnext_message
+
+
+def update_bio_data(name, zk_user, type, no, index, valid, format, major_version, minor_version, template):
+    """
+    Example: update_bio_data('CCK24212349', 1, 0, 0, 0, 0, 35, 10, 'dsfkcdxzpsalf...')
+    """
+    url = f"{config.ERPNEXT_URL}/api/resource/ZK Bio Data/{name}"
+    headers = utils.get_headers()
+
+    data = {
+        'zk_user' : zk_user,
+        'type' : type,
+        'no' : no,
+        'index' : index,
+        'valid' : valid,
+        'format' : format,
+        'major_version' : major_version,
+        'minor_version' : minor_version,
+        'template' : template
+	}
     
-    
+    response = requests.request("PUT", url, headers=headers, json=data)
+    if response.status_code == 200:
+        #print("response.content",response._content)
+
+        return 200, json.loads(response._content)['data']['name']
+    else:
+        error_str = utils.safe_get_error_str(response)
+        print('\t'.join(['Error during ERPNext API Call.', str(zk_user), str(type), str(no), str(index),  error_str]))
+        return response.status_code, error_str
+
+
 def create_bio_data(zk_user, type, no, index, valid, format, major_version, minor_version, template):
     """
-    Example: create_bio_data('CCK24212349', info)
+    Example: create_bio_data('CCK24212349', 1, 0, 0, 0, 0, 35, 10, 'dsfkcdxzpsalf...')
     """
     url = f"{config.ERPNEXT_URL}/api/resource/ZK Bio Data"
     headers = utils.get_headers()
@@ -309,9 +438,54 @@ def create_bio_data(zk_user, type, no, index, valid, format, major_version, mino
         return response.status_code, error_str
 
 
+def save_bio_photo(zk_user, type, no, index, file_name, size, content):
+    #if exists bio photo
+    #	update zk bio photo
+    #else
+    #	create zk bio photo
+    erpnext_status_code, erpnext_message = get_bio_photo(zk_user, type, no, index)
+    if erpnext_status_code == 200:
+        biophotos = erpnext_message
+        if len(biophotos)>0:
+            biophoto = biophotos[0]
+            erpnext_status_code, erpnext_message = update_bio_photo(biophoto['name'], zk_user, type, no, index, file_name, size, content)
+        else:
+            erpnext_status_code, erpnext_message = create_bio_photo(zk_user, type, no, index, file_name, size, content)
+
+    return erpnext_status_code, erpnext_message
+
+
+def update_bio_photo(name, zk_user, type, no, index, file_name, size, content):
+    """
+    Example: update_bio_photo('CCK24212349', 1, 0, 0, '1.jpg', 10055, 'sdfkjxzlierl3234...')
+    """
+    url = f"{config.ERPNEXT_URL}/api/resource/ZK Bio Photo/{name}"
+    headers = utils.get_headers()
+
+    data = {
+        'zk_user' : zk_user,
+        'type' : type,
+        'no' : no,
+        'index' : index,
+        'file_name' : file_name,
+        'size' : size,
+        'content' : content
+	}
+    
+    response = requests.request("PUT", url, headers=headers, json=data)
+    if response.status_code == 200:
+        #print("response.content",response._content)
+
+        return 200, json.loads(response._content)['data']['name']
+    else:
+        error_str = utils.safe_get_error_str(response)
+        print('\t'.join(['Error during ERPNext API Call.', str(zk_user), str(type), str(no), str(index),  error_str]))
+        return response.status_code, error_str  
+
+
 def create_bio_photo(zk_user, type, no, index, file_name, size, content):
     """
-    Example: create_bio_photo('CCK24212349', info)
+    Example: create_bio_photo('CCK24212349', 1, 0, 0, '1.jpg', 10055, 'sdfkjxzlierl3234...')
     """
     url = f"{config.ERPNEXT_URL}/api/resource/ZK Bio Photo"
     headers = utils.get_headers()
@@ -341,7 +515,7 @@ def list_user(search_term = None):
     """
     Example: list_user('CBE13422349')
     """
-    fields = 'fields=["id","user_name","password","privilege","group","uid"]'
+    fields = 'fields=["id","user_name","password","privilege","group"]'
     url = f'{config.ERPNEXT_URL}/api/resource/ZK User?{fields}&limit_start=0&limit=500'
     headers = utils.get_headers()
     
@@ -412,21 +586,55 @@ def list_biophoto(user_id):
     
 def get_user(name):
     """
-    Example: list_user('CBE13422349')
+    Example: list_user(1)
     """
     url = f'{config.ERPNEXT_URL}/api/resource/ZK User/{name}'
     headers = utils.get_headers()
-    data = {}
     
-    response = requests.request("GET", url, headers=headers, json=data)
+    response = requests.request("GET", url, headers=headers)
     if response.status_code == 200:
         return 200, json.loads(response._content)['data']
     else:
         error_str = utils.safe_get_error_str(response)
-        if EMPLOYEE_NOT_FOUND_ERROR_MESSAGE in error_str:
-            print('\t'.join(['Error during ERPNext API Call.', str(name), error_str]))
-        else:
-            print('\t'.join(['Error during ERPNext API Call.', str(name), error_str]))
+        print('\t'.join(['Error during ERPNext API Call.', str(name), error_str]))
+        return response.status_code, error_str
+
+
+def get_bio_data(zk_user, type, no, index):
+    """
+    Example: get_bio_data(1,1,0,0)
+    """
+    print("get_bio_dat:",zk_user, type, no ,index)
+    fields = 'fields=["name"]'
+    filters = f'filters=[["zk_user","=",{zk_user}],["type","=",{type}],["no","=",{no}],["index","=",{index}]]'
+    url = f'{config.ERPNEXT_URL}/api/resource/ZK Bio Data?{fields}&{filters}'
+    headers = utils.get_headers()
+    
+    response = requests.request("GET", url, headers=headers)
+    if response.status_code == 200:
+        print("response._content",response._content)
+        return 200, json.loads(response._content)['data']
+    else:
+        error_str = utils.safe_get_error_str(response)
+        print('\t'.join(['Error during ERPNext API Call.', str(zk_user) ,str(type) ,str(no) ,str(index), error_str]))
+        return response.status_code, error_str
+    
+
+def get_bio_photo(zk_user, type, no, index):
+    """
+    Example: get_bio_photo(1)
+    """
+    fields = 'fields=["name"]'
+    filters = f'filters=[["zk_user","=",{zk_user}],["type","=",{type}],["no","=",{no}],["index","=",{index}]]'
+    url = f'{config.ERPNEXT_URL}/api/resource/ZK Bio Photo?{fields}&{filters}'
+    headers = utils.get_headers()
+    
+    response = requests.request("GET", url, headers=headers)
+    if response.status_code == 200:
+        return 200, json.loads(response._content)['data']
+    else:
+        error_str = utils.safe_get_error_str(response)
+        print('\t'.join(['Error during ERPNext API Call.', str(zk_user) ,str(type) ,str(no) ,str(index), error_str]))
         return response.status_code, error_str
 
 
@@ -651,3 +859,70 @@ def delete_user(pin):
         error_str = utils.safe_get_error_str(response)
         print('\t'.join(['Error during API Call.', error_str]))
         return response.status_code, error_str
+
+
+def is_main_terminal(serial_number):
+    erpnext_status_code, erpnext_message = get_terminal(serial_number)
+    if erpnext_status_code == 200:
+        terminal = erpnext_message
+        return terminal["is_main"]
+    else:
+        if not(any(error in erpnext_message for error in allowlisted_errors)):
+            raise Exception('API Call to ERPNext Failed.')
+        return False
+
+
+def save_attendance(serial_number, logs, event):
+    print("event:",event)
+    print("logs:",logs)
+
+    if event == "0":
+        erpnext_status_code, erpnext_message = get_terminal(serial_number)
+        if erpnext_status_code == 200:
+            terminal = erpnext_message
+            device_id = terminal["alias"]
+            print("Alias:",device_id)
+        else:
+            print("\t".join([str(erpnext_status_code), str(device_attendance_log['uid']),
+                str(device_attendance_log['user_id']), str(device_attendance_log['timestamp'].timestamp()),
+                str(device_attendance_log['punch']), str(device_attendance_log['status']),
+                json.dumps(device_attendance_log, default=str)]))
+            attendance_failed_logger.error("\t".join([str(erpnext_status_code), str(device_attendance_log['uid']),
+                str(device_attendance_log['user_id']), str(device_attendance_log['timestamp'].timestamp()),
+                str(device_attendance_log['punch']), str(device_attendance_log['status']),
+                json.dumps(device_attendance_log, default=str)]))
+            if not(any(error in erpnext_message for error in allowlisted_errors)):
+                raise Exception('API Call to ERPNext Failed.')
+
+        print("before setup log")
+        attendance_success_log_file = '_'.join(["attendance_success_log", device_id])
+        attendance_failed_log_file = '_'.join(["attendance_failed_log", device_id])
+        attendance_success_logger = setup_logger(attendance_success_log_file, '/'.join([config.LOGS_DIRECTORY, attendance_success_log_file])+'.log')
+        attendance_failed_logger = setup_logger(attendance_failed_log_file, '/'.join([config.LOGS_DIRECTORY, attendance_failed_log_file])+'.log')
+        print("after setup log")
+
+        for device_attendance_log in logs:
+            print("attendance:",device_attendance_log)
+            punch_direction = None
+            erpnext_status_code, erpnext_message = create_attendance(device_attendance_log['user_id'], device_attendance_log['timestamp'], device_id, punch_direction)
+            if erpnext_status_code == 200:
+                print("\t".join([erpnext_message, str(device_attendance_log['uid']),
+                    str(device_attendance_log['user_id']), str(device_attendance_log['timestamp'].timestamp()),
+                    str(device_attendance_log['punch']), str(device_attendance_log['status']),
+                    json.dumps(device_attendance_log, default=str)]))
+                attendance_success_logger.info("\t".join([erpnext_message, str(device_attendance_log['uid']),
+                    str(device_attendance_log['user_id']), str(device_attendance_log['timestamp'].timestamp()),
+                    str(device_attendance_log['punch']), str(device_attendance_log['status']),
+                    json.dumps(device_attendance_log, default=str)]))
+
+            else:
+                print("\t".join([str(erpnext_status_code), str(device_attendance_log['uid']),
+                    str(device_attendance_log['user_id']), str(device_attendance_log['timestamp'].timestamp()),
+                    str(device_attendance_log['punch']), str(device_attendance_log['status']),
+                    json.dumps(device_attendance_log, default=str)]))
+                attendance_failed_logger.error("\t".join([str(erpnext_status_code), str(device_attendance_log['uid']),
+                    str(device_attendance_log['user_id']), str(device_attendance_log['timestamp'].timestamp()),
+                    str(device_attendance_log['punch']), str(device_attendance_log['status']),
+                    json.dumps(device_attendance_log, default=str)]))
+                if not(any(error in erpnext_message for error in allowlisted_errors)):
+                    raise Exception('API Call to ERPNext Failed.')

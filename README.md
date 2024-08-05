@@ -31,9 +31,9 @@ mit
 - Password
 - Privilege
 - Group
-- UID
 - Main Status
 - Sync Terminal
+
 
 ##### ZK Bio Data
 
@@ -58,6 +58,7 @@ mit
 - Approval Time
 - Enroll Terminal (FK "ZK Terminal")
 
+
 ##### ZK Command
 
 - Frappe "Name" (Autoincrement)
@@ -75,21 +76,24 @@ mit
 ##### Frappe
 - [X] Guest URL /iclock
 - [X] ZK Terminal Page
-    - [X] Clear Users in ZK Terminal
-    - [X] Download Users to ZK Terminal
-    - [X] Upload Users to Server
-    - [X] ZK Terminal : Direct Command
+    - [X] Direct Command
         - [X] Get Info
-        - [X] Clear User
-        - [X] Set User
-        - [X] Get User
-    - [X] ZK User : Pre Delete
-    - [X] ZK User : Sync User
+        - [X] Clear User (Clear Users in ZK Terminal)
+        - [X] Set User (Download Users to ZK Terminal)
+        - [X] Get User (Upload Users to Server)
+    - [X] Is Main
+        - [X] Add/Update User
+- [X] ZK User Page
+    - [X] Terminal : Pre Delete
+    - [X] Terminal : Sync User
         - [X] Sync New/Modified User
         - [X] Sync Deleted User
-    - [ ] Log
-- [X] ZK User Page
+- [X] ZK Bio Data
+      [X] Add/Update Bio Data
+- [X] ZK Bio Photo
+      [X] Add/Update Bio Photo
 - [X] ZK Command Page
+- [ ] File : Log
 
 ##### /iclock command
 

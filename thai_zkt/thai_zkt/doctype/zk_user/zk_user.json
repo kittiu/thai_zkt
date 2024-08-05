@@ -12,7 +12,6 @@
   "password",
   "privilege",
   "group",
-  "uid",
   "main_status",
   "sync_terminal"
  ],
@@ -46,11 +45,6 @@
    "label": "Group"
   },
   {
-   "fieldname": "uid",
-   "fieldtype": "Data",
-   "label": "UID"
-  },
-  {
    "default": "Add",
    "fieldname": "main_status",
    "fieldtype": "Data",
@@ -66,7 +60,7 @@
  ],
  "index_web_pages_for_search": 1,
  "links": [],
- "modified": "2024-07-29 13:38:59.809550",
+ "modified": "2024-08-03 03:44:36.788224",
  "modified_by": "Administrator",
  "module": "Thai ZKT",
  "name": "ZK User",

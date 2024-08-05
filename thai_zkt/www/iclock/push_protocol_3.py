@@ -138,13 +138,41 @@ def cmd_check(serial_number):
 
 def handle_querydata_post_options(serial_number,data):
     ret_msg = "OK"
-    
-    ret_msg = service.set_terminal_options(serial_number,data)
+
+    words = data.split(",")
+    print("words:",words) 
+
+    # resolve "~OEMVendor=ZKTECO CO., LTD." (Comma is inside company name)
+    finalwords = []
+    idx = 0
+
+    for word in words:
+        if "=" in word:
+            finalwords.append(word)
+            idx += 1
+        else:
+            finalwords[idx-1] = finalwords[idx-1] + "," + word
+
+    info = {}
+    for word in finalwords:
+        print("  -",word)
+        entry = word.split("=")
+        if entry[0] == '~Platform':
+            info['~Platform'] = entry[1]
+        elif entry[0] == 'IPAddress':
+            info['IPAddress'] = entry[1]
+        elif entry[0] == '~DeviceName':
+            info['~DeviceName'] = entry[1]
+        elif entry[0] == 'FWVersion':
+            info['FWVersion'] = entry[1]
+
+    ret_msg = service.update_terminal_info(serial_number, info)
+    ret_msg = service.set_terminal_options(serial_number, data)
     
     return ret_msg
 
 
-def handle_querydata_post_tabledata_user(data):
+def handle_querydata_post_tabledata_user(is_main, data):
     ret_msg = "OK"
     
     lines = data.split("\n")
@@ -156,7 +184,7 @@ def handle_querydata_post_tabledata_user(data):
         words = line.split("\t")
         print("words:",words)
 
-        if words[0].startswith("user uid"):
+        if words[0].startswith("user"):
             kv = words[0].split("=")
             user_id = kv[1]
             kv = words[2].split("=")
@@ -170,18 +198,20 @@ def handle_querydata_post_tabledata_user(data):
             kv = words[4].split("=")
             user_grp = kv[1]
 
-            erpnext_status_code, erpnext_message = service.create_user(pin, user_name, user_pri, user_password, user_grp, user_id)
-            print("erpnext_status_code:",erpnext_status_code)
-            if erpnext_status_code == 200:
-                user_cnt += 1
+            if is_main:
+                erpnext_status_code, erpnext_message = service.save_user(pin, user_name, user_pri, user_password, user_grp)
+
+            user_cnt += 1
 
     if user_cnt > 0:
         ret_msg = "user=" + str(user_cnt)
+    else:
+        ret_msg = "OK"
     
     return ret_msg
 
 
-def handle_querydata_post_tabledata_biodata(data):
+def handle_querydata_post_tabledata_biodata(is_main, data):
     ret_msg = "OK"
     
     lines = data.split("\r\n")
@@ -213,24 +243,25 @@ def handle_querydata_post_tabledata_biodata(data):
             #kv = words[9].split("=")
             template = words[9][4:]
 
-            erpnext_status_code, erpnext_message = service.create_bio_data(zk_user, type, no, index, valid, format, major_version, minor_version, template)
-            print("erpnext_status_code:",erpnext_status_code)
-            if erpnext_status_code == 200:
-                biodata_cnt += 1
+            if is_main:
+                erpnext_status_code, erpnext_message = service.save_bio_data(zk_user, type, no, index, valid, format, major_version, minor_version, template)
+            biodata_cnt += 1
 
     if biodata_cnt > 0:
         ret_msg = "biodata=" + str(biodata_cnt)
+    else:
+        ret_msg = "OK"
     
     return ret_msg
 
 
-def handle_querydata_post_tabledata_biophoto(data):
+def handle_querydata_post_tabledata_biophoto(is_main, data):
     ret_msg = "OK"
     
     lines = data.split("\n")
     print("lines:",lines)
 
-    biodata_cnt = 0
+    biophoto_cnt = 0
 
     for line in lines:
         words = line.split("\t")
@@ -251,14 +282,16 @@ def handle_querydata_post_tabledata_biophoto(data):
             size = kv[1]
             content = words[6][8:]
 
-            erpnext_status_code, erpnext_message = service.create_bio_photo(zk_user, type, no, index, file_name, size, content)
-            print("erpnext_status_code:",erpnext_status_code)
-            if erpnext_status_code == 200:
-                biodata_cnt += 1
+            if is_main:
+                erpnext_status_code, erpnext_message = service.save_bio_photo(zk_user, type, no, index, file_name, size, content)
 
-    if biodata_cnt > 0:
-        ret_msg = "biophoto=" + str(biodata_cnt)
-    
+            biophoto_cnt += 1
+
+    if biophoto_cnt > 0:
+        ret_msg = "biophoto=" + str(biophoto_cnt)
+    else:
+        ret_msg = "OK"
+
     return ret_msg
 
 
@@ -416,4 +449,33 @@ def create_delete_user_command(user, serial_number, add_after_done=False):
     
     cmd_line = get_cmd_delete_user(str(user.get("id")))
     status, new_cmd_id = service.create_command(serial_number, cmd_line, 'Create', after_done)
-    
+
+
+
+def handle_cdata_post_rtlog(serial_number, data):
+    words = data.split("\t")
+    print("words:",words)
+
+    device_attendance_log = {}
+
+    kv = words[0].split("=")
+    device_attendance_log["timestamp"] = utils.safe_convert_date(kv[1], "%Y-%m-%d %H:%M:%S")
+    kv = words[1].split("=")
+    device_attendance_log["user_id"] = kv[1]
+    kv = words[3].split("=")
+    eventaddr = kv[1]
+    kv = words[4].split("=")
+    event = kv[1]
+    kv = words[5].split("=")
+    device_attendance_log["punch"] = kv[1]
+    kv = words[6].split("=")
+    verifytype = kv[1]
+    kv = words[7].split("=")
+    index = kv[1]
+
+    device_attendance_log["uid"] = "0"
+    device_attendance_log["status"] = "0"
+
+    logs = [device_attendance_log]
+
+    service.save_attendance(serial_number, logs, event)
