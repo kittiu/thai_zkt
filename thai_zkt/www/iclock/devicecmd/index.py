@@ -58,6 +58,7 @@ def get_context(context):
 								command = erpnext_message
 								if command.get('after_done'):
 									after_done = json.loads(command.get('after_done'))
+									print("after_done:",after_done)
 									if after_done["action"] == "update_sync_terminal":
 										erpnext_status_code, erpnext_message = service.update_sync_terminal(after_done["pin"], serial_number)
        

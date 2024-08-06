@@ -777,7 +777,7 @@ def get_terminal_count():
     response = requests.request("GET", url, headers=headers)
     if response.status_code == 200:
         #print("response.content",response._content)
-        return 200, response.content
+        return 200, int(json.loads(response.content)['message'])
     else:
         error_str = utils.safe_get_error_str(response)
         print('\t'.join(['Error during API Call.', error_str]))
@@ -798,10 +798,10 @@ def update_sync_terminal(pin, serial_number):
         for line in lines:
             if len(line)>0:
                 finallines.append(line)
-                
+
         finallines.append(serial_number)
         sync_terminal = ",".join(finallines)
-        
+
         url = f"{config.ERPNEXT_URL}/api/resource/ZK User/{pin}"
         headers = utils.get_headers()
 
@@ -814,7 +814,7 @@ def update_sync_terminal(pin, serial_number):
         
         code, message = get_terminal_count()
         if code == 200:
-            terminal_count = json.loads(message)["message"]
+            terminal_count = message
         
         print("terminal_count:",terminal_count)
         print("finallines:",finallines)
@@ -843,6 +843,17 @@ def update_sync_terminal(pin, serial_number):
                 Delete ZK User
                 """
                 delete_user(pin)
+
+                return 200, "OK"
+        else:
+            response = requests.request("PUT", url, headers=headers, json=data)
+            if response.status_code == 200:
+                #print("response.content",response._content)
+                return 200, json.loads(response._content)['data']['name']
+            else:
+                error_str = utils.safe_get_error_str(response)
+                print('\t'.join(['Error during ERPNext API Call.', str(pin), str(sync_terminal),  error_str]))
+                return response.status_code, error_str
         
         
 def delete_user(pin):
