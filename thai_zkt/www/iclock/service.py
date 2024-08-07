@@ -323,7 +323,8 @@ def update_user(user_id, user_name, user_pri, user_password, user_grp):
         'user_name' : user_name,
         'password' : user_password,
         'privilege' : user_pri,
-        'group' : user_grp
+        'group' : user_grp,
+        'main_status' : 'Add'
 	}
     
     response = requests.request("PUT", url, headers=headers, json=data)
@@ -348,7 +349,8 @@ def create_user(user_id, user_name, user_pri, user_password, user_grp):
         'user_name' : user_name,
         'password' : user_password,
         'privilege' : user_pri,
-        'group' : user_grp
+        'group' : user_grp,
+        'main_status' : 'Add'
 	}
     
     response = requests.request("POST", url, headers=headers, json=data)
@@ -359,6 +361,28 @@ def create_user(user_id, user_name, user_pri, user_password, user_grp):
         error_str = utils.safe_get_error_str(response)
         print('\t'.join(['Error during ERPNext API Call.', str(id), str(user_name),  error_str]))
         return response.status_code, error_str
+
+
+def update_user_main_status(zk_user):
+    """
+    Example: update_user_main_status('1')
+    """
+    url = f"{config.ERPNEXT_URL}/api/resource/ZK User/{zk_user}"
+    headers = utils.get_headers()
+
+    data = {
+        'main_status' : 'Add'
+	}
+    
+    response = requests.request("PUT", url, headers=headers, json=data)
+    if response.status_code == 200:
+        #print("response.content",response._content)
+        return 200, json.loads(response._content)['data']['id']
+    else:
+        error_str = utils.safe_get_error_str(response)
+        print('\t'.join(['Error during ERPNext API Call.', str(zk_user), error_str]))
+        return response.status_code, error_str    
+
 
 
 def save_bio_data(zk_user, type, no, index, valid, format, major_version, minor_version, template):
@@ -374,6 +398,9 @@ def save_bio_data(zk_user, type, no, index, valid, format, major_version, minor_
             erpnext_status_code, erpnext_message = update_bio_data(biodata['name'], zk_user, type, no, index, valid, format, major_version, minor_version, template)
         else:
             erpnext_status_code, erpnext_message = create_bio_data(zk_user, type, no, index, valid, format, major_version, minor_version, template)
+        
+        if erpnext_status_code == 200:
+            update_user_main_status(zk_user)
 
     return erpnext_status_code, erpnext_message
 
@@ -451,6 +478,10 @@ def save_bio_photo(zk_user, type, no, index, file_name, size, content):
             erpnext_status_code, erpnext_message = update_bio_photo(biophoto['name'], zk_user, type, no, index, file_name, size, content)
         else:
             erpnext_status_code, erpnext_message = create_bio_photo(zk_user, type, no, index, file_name, size, content)
+
+        if erpnext_status_code == 200:
+            update_user_main_status(zk_user)
+
 
     return erpnext_status_code, erpnext_message
 
