@@ -1,5 +1,6 @@
 {
  "actions": [],
+ "allow_import": 1,
  "allow_rename": 1,
  "autoname": "field:id",
  "creation": "2024-07-01 18:33:18.920401",
@@ -10,7 +11,9 @@
   "user_name",
   "password",
   "privilege",
-  "group"
+  "group",
+  "main_status",
+  "sync_terminal"
  ],
  "fields": [
   {
@@ -40,11 +43,24 @@
    "fieldname": "group",
    "fieldtype": "Data",
    "label": "Group"
+  },
+  {
+   "default": "Add",
+   "fieldname": "main_status",
+   "fieldtype": "Data",
+   "label": "Main Status",
+   "options": "Sync\nAdd\nPre Delete",
+   "reqd": 1
+  },
+  {
+   "fieldname": "sync_terminal",
+   "fieldtype": "Long Text",
+   "label": "Sync Terminal"
   }
  ],
  "index_web_pages_for_search": 1,
  "links": [],
- "modified": "2024-07-02 07:19:48.124529",
+ "modified": "2024-08-03 03:44:36.788224",
  "modified_by": "Administrator",
  "module": "Thai ZKT",
  "name": "ZK User",

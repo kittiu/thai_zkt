@@ -5,21 +5,15 @@
  "doctype": "DocType",
  "engine": "InnoDB",
  "field_order": [
-  "id",
   "terminal",
   "terminal_alias",
   "command",
   "status",
   "sent_time",
-  "done_time"
+  "done_time",
+  "after_done"
  ],
  "fields": [
-  {
-   "fieldname": "id",
-   "fieldtype": "Int",
-   "in_list_view": 1,
-   "label": "ID"
-  },
   {
    "fieldname": "terminal",
    "fieldtype": "Link",
@@ -30,7 +24,7 @@
   },
   {
    "fieldname": "command",
-   "fieldtype": "Data",
+   "fieldtype": "Long Text",
    "in_list_view": 1,
    "label": "Command",
    "reqd": 1
@@ -59,11 +53,16 @@
    "fieldname": "terminal_alias",
    "fieldtype": "Data",
    "label": "Terminal Alias"
+  },
+  {
+   "fieldname": "after_done",
+   "fieldtype": "Data",
+   "label": "After Done"
   }
  ],
  "index_web_pages_for_search": 1,
  "links": [],
- "modified": "2024-07-02 20:35:46.042301",
+ "modified": "2024-07-29 13:10:18.859530",
  "modified_by": "Administrator",
  "module": "Thai ZKT",
  "name": "ZK Command",

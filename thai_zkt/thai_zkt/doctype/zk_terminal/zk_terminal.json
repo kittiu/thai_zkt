@@ -9,12 +9,16 @@
  "field_order": [
   "serial_number",
   "alias",
+  "is_main",
+  "device_type",
+  "push_version",
   "ip_address",
   "model",
   "platform",
   "fw_version",
-  "push_version",
-  "last_activity"
+  "last_activity",
+  "registry_code",
+  "options"
  ],
  "fields": [
   {
@@ -60,11 +64,33 @@
    "fieldname": "last_activity",
    "fieldtype": "Datetime",
    "label": "Last Activity"
+  },
+  {
+   "fieldname": "registry_code",
+   "fieldtype": "Data",
+   "label": "Registry Code"
+  },
+  {
+   "default": "att",
+   "fieldname": "device_type",
+   "fieldtype": "Data",
+   "label": "Device Type"
+  },
+  {
+   "fieldname": "options",
+   "fieldtype": "Long Text",
+   "label": "Options"
+  },
+  {
+   "default": "0",
+   "fieldname": "is_main",
+   "fieldtype": "Check",
+   "label": "Is Main"
   }
  ],
  "index_web_pages_for_search": 1,
  "links": [],
- "modified": "2024-07-02 06:04:07.345472",
+ "modified": "2024-07-24 11:25:41.405707",
  "modified_by": "Administrator",
  "module": "Thai ZKT",
  "name": "ZK Terminal",

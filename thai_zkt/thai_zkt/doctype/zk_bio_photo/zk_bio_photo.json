@@ -2,82 +2,62 @@
  "actions": [],
  "allow_import": 1,
  "autoname": "autoincrement",
- "creation": "2024-07-02 05:02:17.380606",
+ "creation": "2024-07-21 18:28:26.397170",
  "doctype": "DocType",
  "engine": "InnoDB",
  "field_order": [
   "zk_user",
-  "type",
   "no",
   "index",
-  "valid",
-  "format",
-  "major_version",
-  "minor_version",
-  "template"
+  "type",
+  "file_name",
+  "size",
+  "content"
  ],
  "fields": [
   {
    "fieldname": "zk_user",
    "fieldtype": "Link",
-   "in_list_view": 1,
    "label": "ZK User",
-   "options": "ZK User",
-   "reqd": 1
-  },
-  {
-   "fieldname": "type",
-   "fieldtype": "Int",
-   "in_list_view": 1,
-   "label": "Type",
-   "reqd": 1
+   "options": "ZK User"
   },
   {
    "fieldname": "no",
    "fieldtype": "Int",
-   "in_list_view": 1,
-   "label": "No",
-   "reqd": 1
+   "label": "No"
   },
   {
    "fieldname": "index",
    "fieldtype": "Int",
-   "label": "Index",
-   "reqd": 1
+   "label": "Index"
   },
   {
-   "fieldname": "valid",
-   "fieldtype": "Int",
-   "label": "Valid"
-  },
-  {
-   "fieldname": "format",
-   "fieldtype": "Int",
-   "label": "Format"
-  },
-  {
-   "fieldname": "major_version",
+   "fieldname": "file_name",
    "fieldtype": "Data",
-   "label": "Major Version"
+   "label": "File Name"
   },
   {
-   "fieldname": "minor_version",
-   "fieldtype": "Data",
-   "label": "Minor Version"
+   "fieldname": "type",
+   "fieldtype": "Int",
+   "label": "Type"
   },
   {
-   "fieldname": "template",
+   "fieldname": "content",
    "fieldtype": "Long Text",
-   "label": "Template",
-   "reqd": 1
+   "label": "Content"
+  },
+  {
+   "fieldname": "size",
+   "fieldtype": "Int",
+   "label": "Size"
   }
  ],
  "index_web_pages_for_search": 1,
  "links": [],
- "modified": "2024-07-27 13:47:12.535993",
+ "modified": "2024-07-27 13:46:57.287575",
  "modified_by": "Administrator",
  "module": "Thai ZKT",
- "name": "ZK Bio Data",
+ "name": "ZK Bio Photo",
  "naming_rule": "Autoincrement",
  "owner": "Administrator",
  "permissions": [
