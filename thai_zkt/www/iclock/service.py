@@ -324,7 +324,8 @@ def update_user(user_id, user_name, user_pri, user_password, user_grp):
         'password' : user_password,
         'privilege' : user_pri,
         'group' : user_grp,
-        'main_status' : 'Add'
+        'main_status' : 'Add',
+        'sync_terminal' : ''
 	}
     
     response = requests.request("PUT", url, headers=headers, json=data)
@@ -371,7 +372,8 @@ def update_user_main_status(zk_user):
     headers = utils.get_headers()
 
     data = {
-        'main_status' : 'Add'
+        'main_status' : 'Add',
+        'sync_terminal' : ''
 	}
     
     response = requests.request("PUT", url, headers=headers, json=data)
