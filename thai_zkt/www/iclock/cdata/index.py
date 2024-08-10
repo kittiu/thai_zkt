@@ -70,6 +70,7 @@ def get_context(context):
 		data = request.get_data(True,True)
 		print("data:",data)
 
+		# ZK Terminal : Direct Command : Get Info
 		if table == "options":
 
 			code, terminal = service.get_terminal(serial_number)
@@ -80,26 +81,35 @@ def get_context(context):
 			else:
 				push2.handle_querydata_post_options(serial_number, data)
 
+		# Get Attendance
 		elif table == "ATTLOG": # push protocol v.2
 
 			push2.handle_cdata_post_attlog(serial_number, data) # attendance
 
+		# ZK Terminal : Direct Command : Get User (User & Bio Photo)
+		# or Terminal sends data itself
 		elif table == "OPERLOG": # push protocol v.2
 
 			is_main = service.is_main_terminal(serial_number)
 			ret_msg = push2.handle_cdata_post_operlog(is_main, data) # user & bio photo
 
+		# ZK Terminal : Direct Command : Get User (Bio Data)
+		# or Terminal send data itself
 		elif table == "BIODATA": # push protocol v.2
 
 			is_main = service.is_main_terminal(serial_number)
 			ret_msg = push2.handle_cdata_post_biodata(is_main, data) # bio data
 
+		# Get Attendance
 		elif table == "rtlog": # push protocol v.3
 
 			push3.handle_cdata_post_rtlog(serial_number, data) # attendance
       
+	  	# ZK Terminal : Direct Command : Get User (User, Bio Data, Bio Photo)
+		# or Terminal sends data itself
 		elif table == "tabledata": # push protocol v.3
-	
+
+			# Only Main ZK Terminal can send data to server
 			is_main = service.is_main_terminal(serial_number)
 
 			tablename = utils.get_arg(args,'tablename')
