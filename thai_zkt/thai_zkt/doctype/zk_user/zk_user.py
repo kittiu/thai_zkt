@@ -23,7 +23,7 @@ def sync(users):
 	).run(as_dict=True)
  
 	for terminal in terminals:
-		if terminal.push_version.startswith("3"):
+		if terminal["push_version"].startswith("3"):
 			terminal["push"] = push3
 		else:
 			terminal["push"] = push2

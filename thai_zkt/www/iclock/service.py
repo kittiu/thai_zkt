@@ -75,6 +75,30 @@ def update_command_status(cmd_id, status):
         error_str = utils.safe_get_error_str(response)
         print('\t'.join(['Error during ERPNext API Call.', str(cmd_id), str(status),  error_str]))
         return response.status_code, error_str
+    
+
+def update_command_after_done(cmd_id, value):
+    """
+    Example: update_command_status(1, "Sent")
+    """
+    url = f"{config.ERPNEXT_URL}/api/resource/ZK Command/{cmd_id}"
+    headers = utils.get_headers()
+
+    data = {
+        'after_done' : value
+	}
+
+    print("data:",data)
+
+    response = requests.request("PUT", url, headers=headers, json=data)
+    if response.status_code == 200:
+        #print("response.content",response._content)
+        return 200, json.loads(response._content)['data']['name']
+    else:
+        error_str = utils.safe_get_error_str(response)
+        print('\t'.join(['Error during ERPNext API Call.', str(cmd_id), str(value),  error_str]))
+        return response.status_code, error_str
+
 
 def update_terminal_info(serial_number, info):
 
@@ -126,9 +150,6 @@ def save_terminal(serial_number, info):
     if fw_version:
         data['fw_version'] = fw_version
     
-    if info.get('~Platform') != None:
-        data['platform'] = info['~Platform']
-        
     if info.get('IPAddress') != None:
         data['ip_address'] = info['IPAddress']
         
@@ -138,8 +159,14 @@ def save_terminal(serial_number, info):
     if info.get('PushVersion') != None:
         data['push_version'] = info['PushVersion']
         
-    if info.get('DeviceType') != None:
-        data['device_type'] = info['DeviceType']
+    if info.get('UserCount') != None:
+        data['user_count'] = int(info['UserCount'])
+
+    if info.get('FaceCount') != None:
+        data['face_count'] = int(info['FaceCount'])
+
+    if info.get('FPCount') != None:
+        data['fingerprint_count'] = int(info['FPCount'])
 
     print("save_terminal() data:",data)
 
@@ -184,9 +211,8 @@ def get_terminal(serial_number):
     """
     url = f"{config.ERPNEXT_URL}/api/resource/ZK Terminal/" + serial_number
     headers = utils.get_headers()
-    data = {
-    }
-    response = requests.request("GET", url, headers=headers, json=data)
+    response = requests.request("GET", url, headers=headers)
+    print("response:",response)
     if response.status_code == 200:
         return 200, json.loads(response._content)['data']
     else:
@@ -816,6 +842,21 @@ def get_terminal_count():
         print('\t'.join(['Error during API Call.', error_str]))
         return response.status_code, error_str
 
+def get_user_count(serial_number):
+    url = f"{config.ERPNEXT_URL}/api/method/thai_zkt.api.count_user"
+    headers = utils.get_headers()
+    data = {
+        'serial_number':serial_number
+    }
+    response = requests.request("GET", url, headers=headers, json=data)
+    if response.status_code == 200:
+        #print("response.content",response._content)
+        return 200, json.loads(response.content)['message']
+    else:
+        error_str = utils.safe_get_error_str(response)
+        print('\t'.join(['Error during API Call.', error_str]))
+        return response.status_code, error_str
+
 
 def update_sync_terminal(pin, serial_number):
     """
@@ -970,3 +1011,26 @@ def save_attendance(serial_number, logs, event):
                     json.dumps(device_attendance_log, default=str)]))
                 if not(any(error in erpnext_message for error in allowlisted_errors)):
                     raise Exception('API Call to ERPNext Failed.')
+
+
+
+def update_compare_screen(serial_number):
+
+    print("update_compare_screen()")
+    
+    code, cnts = get_user_count(serial_number)
+
+    print("code:",code)
+
+    if code==200:
+        print("cnts:",cnts)
+
+        t_user_cnt = cnts["t_user_cnt"]
+        t_biodata_cnt = cnts["t_biodata_cnt"]
+        t_biophoto_cnt = cnts["t_biophoto_cnt"]
+
+        print("t_user_cnt:",str(t_user_cnt))
+        print("t_biodata_cnt:",str(t_biodata_cnt))
+        print("t_biophoto_cnt:",str(t_biophoto_cnt))
+        
+        frappe.publish_realtime("compare_terminal", dict(s_user_cnt=cnts["user_cnt"], s_biodata_cnt=cnts["biodata_cnt"], s_biophoto_cnt=cnts["biophoto_cnt"], t_user_cnt=t_user_cnt, t_biodata_cnt=t_biodata_cnt, t_biophoto_cnt=t_biophoto_cnt))

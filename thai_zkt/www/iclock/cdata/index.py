@@ -35,17 +35,14 @@ def get_context(context):
 		language = utils.get_arg(args,'language')
 		pushver = utils.get_arg(args,'pushver')
 		pushflag = utils.get_arg(args,'PushOptionsFlag')
-		devicetype = utils.get_arg(args,'DeviceType')
   
 		print("Options:",options)
 		print("Language:",language)
 		print("Push Ver:",pushver)
 		print("Push Options Flag:",pushflag)
-		print("Device Type:",devicetype)
   
 		info = {
-			"PushVersion":pushver,
-			"DeviceType":devicetype
+			"PushVersion":pushver
 		}
   
 		ret_msg = service.update_terminal_info(serial_number, info)
@@ -75,9 +72,10 @@ def get_context(context):
 
 		if table == "options":
 
-			terminal = service.get_terminal(serial_number)
+			code, terminal = service.get_terminal(serial_number)
+			print("terminal.push_version:",terminal["push_version"])
 
-			if terminal.push_version.startswith("3"):
+			if terminal["push_version"].startswith("3"):
 				push3.handle_querydata_post_options(serial_number, data)
 			else:
 				push2.handle_querydata_post_options(serial_number, data)
@@ -112,7 +110,7 @@ def get_context(context):
 				ret_msg = push3.handle_querydata_post_tabledata_biodata(is_main, data)
 			elif tablename == "biophoto":
 				ret_msg = push3.handle_querydata_post_tabledata_biophoto(is_main, data)
-    
+
 		else:
 
 			lines = data.split("\n")

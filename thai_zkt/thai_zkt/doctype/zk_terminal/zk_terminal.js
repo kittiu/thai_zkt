@@ -134,7 +134,46 @@ function addBtnGetUsers(frm,menu_name) {
     }, __(menu_name));
 }
 
+function addBtnCmpWithSvr(frm,menu_name) {
+    frm.add_custom_button(__("Compare With Server"), function() {
+        frappe.confirm(
+            'Are you sure to Compare User in Terminal '+frm.doc.name+' with Server?',
+            function(){
+
+                frm.zk_data = null;
+                frm.dashboard.reset();
+
+                window.close();
+
+                frappe.call({
+                    method: 'thai_zkt.thai_zkt.doctype.zk_terminal.zk_terminal.compare_user',
+                    args: {
+                        terminal: frm.doc.name
+                    },
+                    freeze: true,
+                    callback: (r) => {
+                        //frappe.msgprint("Compare User in Terminal "+frm.doc.name);
+                    },
+                    error: (r) => {
+                        frappe.msgprint("Error : "+frm.doc.name);
+                    }
+                })                    
+            },
+            function(){
+                window.close();
+            }
+        )
+    }, __(menu_name));
+}
+
 frappe.ui.form.on("ZK Terminal", {
+
+    setup(frm) {
+        frappe.realtime.on("compare_terminal", (data) => {
+            frm.zk_data = data;
+            showDashboard(frm);
+        });
+    },
     
  	onload(frm) {
 
@@ -160,6 +199,32 @@ frappe.ui.form.on("ZK Terminal", {
         addBtnClearUsers(frm,menu_name);
         addBtnSetUsers(frm,menu_name);
         addBtnGetUsers(frm,menu_name);
+        addBtnCmpWithSvr(frm,menu_name);
+
+        showDashboard(frm);
     }
 
+
 });
+
+function showDashboard(frm) {
+
+    var data = frm.zk_data;
+
+    if (data) {
+        frm.dashboard.reset();
+        frm.dashboard.set_headline("Compare with Server");
+        frm.dashboard.add_indicator(
+            __("Server: User={0}, Bio Data={1}, Bio Photo={2}", [
+                    data.s_user_cnt, data.s_biodata_cnt, data.s_biophoto_cnt
+            ]),
+            "blue"
+        );
+        frm.dashboard.add_indicator(
+            __("Terminal: User={0}, Bio Data={1}, Bio Photo={2}", [
+                    data.t_user_cnt, data.t_biodata_cnt, data.t_biophoto_cnt
+            ]),
+            data.s_user_cnt==data.t_user_cnt && data.s_biodata_cnt==data.t_biodata_cnt && data.s_biophoto_cnt==data.t_biophoto_cnt ? "blue" : "red"
+        );
+    }
+}
