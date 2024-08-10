@@ -42,17 +42,18 @@ def get_context(context):
 					post_args = parse_qs(line)
 					print(f"post_args {ldx}:", post_args)
      
-					# update ZK Command Status to 'Done'
+					# get ZK Command ID from Terminal
 					p_id = utils.get_arg(post_args,'ID')
 					p_ret_code = utils.get_arg(post_args,'Return')
 					p_cmd = utils.get_arg(post_args,'CMD')
 
-					#set ZK Command Status to 'Done'
+					# update ZK Command Status to 'Done'
 					erpnext_status_code, erpnext_message = service.update_command_status(p_id, "Done")
 					try:
 						if erpnext_status_code == 200:
 							ret_msg = "OK"
-       
+							
+							# ZK Terminal Form : Direct Command : 'Terminals : Sync User'
 							erpnext_status_code, erpnext_message = service.get_command(p_id)
 							if erpnext_status_code == 200:
 								command = erpnext_message
@@ -60,6 +61,7 @@ def get_context(context):
 									after_done = json.loads(command.get('after_done'))
 									print("after_done:",after_done)
 									if after_done["action"] == "update_sync_terminal":
+										# Add Synced ZK Terminal in ZK User.sync_terminal
 										erpnext_status_code, erpnext_message = service.update_sync_terminal(after_done["pin"], serial_number)
        
 						elif erpnext_status_code == 404:

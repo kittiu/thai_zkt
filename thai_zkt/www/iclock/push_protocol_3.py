@@ -5,13 +5,14 @@ import thai_zkt.www.iclock.service as service
 import frappe
 from asyncio.log import logger
 
+"""
+Some Command Values for ZK Command.command
+"""
 CMD_GET_INFO = "_GET_OPTIONS"
 CMD_CLEAR_USERS = "DATA DELETE user Pin=*"
 CMD_GET_USERS = "_CHECK"
 
 def handle_cdata_get(args):
-    
-    print("handle_cdata_get()")
     
     serial_number = utils.get_arg(args,'SN')
     print("Serial Number:",serial_number)
@@ -50,8 +51,6 @@ def handle_cdata_get(args):
 
 def handle_push_post(serial_number):
     
-    print("handle_push_post()")
-    
     ret_msg = "\n".join([f"ServerVer=3.1.2"
     , "ServerName=Thai ZKT"
     , "PushVersion=3.1.2"
@@ -71,7 +70,9 @@ def handle_push_post(serial_number):
 
 
 def cmd_get_options(serial_number):
-    print("cmd_get_options()")
+    """
+    ZK Terminal : Direct Command : Get Info
+    """
 
     cmd_line_1 = "GET OPTIONS " + get_options_1()
     status, new_cmd_id_1 = service.create_command(serial_number, cmd_line_1, 'Sent')
@@ -110,8 +111,11 @@ def get_options_4():
     ret_msg = "~SerialNumber,FingerFunOn,FvFunOn,FaceFunOn,~MaxFace7Count,~MaxFvCount,EnalbeIRTempDetection,EnableNormalIRTempPass,EnalbeMaskDetection,EnableWearMaskPass,IRTempThreshold,IRTempUnit,EnableUnregisterPass,EnableTriggerAlarm,IRTempCorrection"
     return ret_msg
 
+
 def cmd_check(serial_number):
-    print("cmd_check()")
+    """
+    ZK Terminal : Direct Command : Get User
+    """
 
     cmd_line_1 = "DATA QUERY tablename=user,fielddesc=*,filter=*"
     status, new_cmd_id_1 = service.create_command(serial_number, cmd_line_1, 'Sent')
@@ -132,6 +136,7 @@ def cmd_check(serial_number):
                              ]) + "\r\n\r\n"
 
     return ret_msg
+
 
 
 def handle_querydata_post_options(serial_number,data):
@@ -184,7 +189,6 @@ def handle_querydata_post_tabledata_user(is_main, data):
 
     for line in lines:
         words = line.split("\t")
-        print("words:",words)
 
         if words[0].startswith("user"):
             kv = words[0].split("=")
@@ -223,7 +227,6 @@ def handle_querydata_post_tabledata_biodata(is_main, data):
 
     for line in lines:
         words = line.split("\t")
-        print("words:",words)
 
         if words[0].startswith("biodata"):
             kv = words[0].split("=")
@@ -267,7 +270,6 @@ def handle_querydata_post_tabledata_biophoto(is_main, data):
 
     for line in lines:
         words = line.split("\t")
-        print("words:",words)
 
         if words[0].startswith("biophoto"):
             kv = words[0].split("=")
@@ -444,7 +446,10 @@ def create_update_user_command(user, serial_number, add_after_done=False):
 
 
 def create_delete_user_command(user, serial_number, add_after_done=False):
-    
+    """
+    - ZK User List : Action : "Terminals : Pre Delete" need to add_after_done to check whether All Terminals' selected users are deleted
+    - ZK User.sync_terminal is used to collect ZK Terminal that finish deleting selected users
+    """
     after_done = ""
     if add_after_done:
         after_done = '{"action":"update_sync_terminal","pin":'+str(user.get("id"))+'}'
@@ -455,6 +460,9 @@ def create_delete_user_command(user, serial_number, add_after_done=False):
 
 
 def handle_cdata_post_rtlog(serial_number, data):
+    """
+    Handle Attendance Info from Terminal
+    """
     words = data.split("\t")
     print("words:",words)
 
@@ -488,21 +496,21 @@ def gen_compare_cmds(serial_number):
     cmd_line = get_cmd_compare("user")
     status, new_cmd_id = service.create_command(serial_number, cmd_line, 'Create')
 
-    cmd_line = get_cmd_compare_biodata()
+    cmd_line = get_cmd_compare("biodata"," Type=*")
     status, new_cmd_id = service.create_command(serial_number, cmd_line, 'Create')
 
     cmd_line = get_cmd_compare("biophoto")
     status, new_cmd_id = service.create_command(serial_number, cmd_line, 'Create')
 
 
-def get_cmd_compare(table):
-    return 'DATA COUNT '+table
+def get_cmd_compare(table, params):
+    return 'DATA COUNT '+table+params
 
-def get_cmd_compare_biodata():
-    return 'DATA COUNT biodata Type=*'
 
 def handle_querydata_post_count_table(data, table, cmd_id):
-    
+    """
+    Handle Count from Terminal Tables (User, Bio Data, Bio Photo) : ZK Terminal Form : Direct Command : Compare With Server
+    """
     lines = data.split("\n")
     print("lines:",lines)
 

@@ -34,11 +34,8 @@ def update_command_list_status(cmd_id_list, status):
         "status":status
     }
 
-    print("data:",data)
-
     response = requests.request("POST", url, headers=headers, json=data)
     if response.status_code == 200:
-        #print("response.content",response._content)
         return 200, "OK"
     else:
         error_str = utils.safe_get_error_str(response)
@@ -69,7 +66,6 @@ def update_command_status(cmd_id, status):
 
     response = requests.request("PUT", url, headers=headers, json=data)
     if response.status_code == 200:
-        #print("response.content",response._content)
         return 200, json.loads(response._content)['data']['name']
     else:
         error_str = utils.safe_get_error_str(response)
@@ -92,7 +88,6 @@ def update_command_after_done(cmd_id, value):
 
     response = requests.request("PUT", url, headers=headers, json=data)
     if response.status_code == 200:
-        #print("response.content",response._content)
         return 200, json.loads(response._content)['data']['name']
     else:
         error_str = utils.safe_get_error_str(response)
@@ -104,6 +99,7 @@ def update_terminal_info(serial_number, info):
 
     ret_msg = "OK"
 
+    # Timestamp ZK Terminal.last_activity
     erpnext_status_code, erpnext_message = update_terminal_last_activity(serial_number)
     try:
         if erpnext_status_code == 200:
@@ -121,7 +117,6 @@ def update_terminal_info(serial_number, info):
     if ret_msg == "OK":
         # update ZK Terminal with info
         try:
-            print("info.pushver:",info.get("PushVersion",""))
             erpnext_status_code, erpnext_message = save_terminal(serial_number, info)
             if erpnext_status_code == 200:
                 ret_msg = "OK"
@@ -168,11 +163,8 @@ def save_terminal(serial_number, info):
     if info.get('FPCount') != None:
         data['fingerprint_count'] = int(info['FPCount'])
 
-    print("save_terminal() data:",data)
-
     response = requests.request("PUT", url, headers=headers, json=data)
     if response.status_code == 200:
-        #print("response.content",response._content)
         return 200, json.loads(response._content)['data']['name']
     else:
         error_str = utils.safe_get_error_str(response)
@@ -198,10 +190,7 @@ def create_attendance(employee_field_value, timestamp, device_id=None, log_type=
         return 200, json.loads(response._content)['message']['name']
     else:
         error_str = utils.safe_get_error_str(response)
-        if EMPLOYEE_NOT_FOUND_ERROR_MESSAGE in error_str:
-            print('\t'.join(['Error during ERPNext API Call.', str(employee_field_value), str(timestamp.timestamp()), str(device_id), str(log_type), error_str]))
-        else:
-            print('\t'.join(['Error during ERPNext API Call.', str(employee_field_value), str(timestamp.timestamp()), str(device_id), str(log_type), error_str]))
+        print('\t'.join(['Error during ERPNext API Call.', str(employee_field_value), str(timestamp.timestamp()), str(device_id), str(log_type), error_str]))
         return response.status_code, error_str
 
 
@@ -267,7 +256,6 @@ def update_terminal_last_activity(serial_number):
 
     response = requests.request("PUT", url, headers=headers, json=data)
     if response.status_code == 200:
-        #print("response.content",response._content)
         return 200, json.loads(response._content)['data']['name']
     else:
         error_str = utils.safe_get_error_str(response)
@@ -275,6 +263,7 @@ def update_terminal_last_activity(serial_number):
         return response.status_code, error_str
     
 def map_user_employee(pin, user_name):
+    # Find Employee that have name as same as ZK User name
 
     fields = 'fields=["name","employee_name"]'
     filters = f'filters=[["employee_name","=","{user_name}"]]'
@@ -283,14 +272,11 @@ def map_user_employee(pin, user_name):
     
     response = requests.request("GET", url=url, headers=headers)
 
-    print("response.status_code:{}".format(response.status_code))
     if response.status_code == 200:
-        print("==================================")
-        print("response._content:",response._content)
-        print("==================================")
 
         employees = json.loads(response._content)['data']
         for employee in employees:
+            # Set Employee.attendance_device_id to ZK User ID
             do_map_user_employee(employee, pin)
 
         return 200, employees
@@ -313,7 +299,6 @@ def do_map_user_employee(employee, pin):
 
     response = requests.request("PUT", url, headers=headers, json=data)
     if response.status_code == 200:
-        #print("response.content",response._content)
         return 200, json.loads(response._content)['data']['name']
     else:
         error_str = utils.safe_get_error_str(response)
@@ -356,7 +341,6 @@ def update_user(user_id, user_name, user_pri, user_password, user_grp):
     
     response = requests.request("PUT", url, headers=headers, json=data)
     if response.status_code == 200:
-        #print("response.content",response._content)
         return 200, json.loads(response._content)['data']['id']
     else:
         error_str = utils.safe_get_error_str(response)
@@ -382,7 +366,6 @@ def create_user(user_id, user_name, user_pri, user_password, user_grp):
     
     response = requests.request("POST", url, headers=headers, json=data)
     if response.status_code == 200:
-        #print("response.content",response._content)
         return 200, json.loads(response._content)['data']['id']
     else:
         error_str = utils.safe_get_error_str(response)
@@ -404,7 +387,6 @@ def update_user_main_status(zk_user):
     
     response = requests.request("PUT", url, headers=headers, json=data)
     if response.status_code == 200:
-        #print("response.content",response._content)
         return 200, json.loads(response._content)['data']['id']
     else:
         error_str = utils.safe_get_error_str(response)
@@ -454,8 +436,6 @@ def update_bio_data(name, zk_user, type, no, index, valid, format, major_version
     
     response = requests.request("PUT", url, headers=headers, json=data)
     if response.status_code == 200:
-        #print("response.content",response._content)
-
         return 200, json.loads(response._content)['data']['name']
     else:
         error_str = utils.safe_get_error_str(response)
@@ -484,8 +464,6 @@ def create_bio_data(zk_user, type, no, index, valid, format, major_version, mino
     
     response = requests.request("POST", url, headers=headers, json=data)
     if response.status_code == 200:
-        #print("response.content",response._content)
-
         return 200, json.loads(response._content)['data']['name']
     else:
         error_str = utils.safe_get_error_str(response)
@@ -533,8 +511,6 @@ def update_bio_photo(name, zk_user, type, no, index, file_name, size, content):
     
     response = requests.request("PUT", url, headers=headers, json=data)
     if response.status_code == 200:
-        #print("response.content",response._content)
-
         return 200, json.loads(response._content)['data']['name']
     else:
         error_str = utils.safe_get_error_str(response)
@@ -561,8 +537,6 @@ def create_bio_photo(zk_user, type, no, index, file_name, size, content):
     
     response = requests.request("POST", url, headers=headers, json=data)
     if response.status_code == 200:
-        #print("response.content",response._content)
-
         return 200, json.loads(response._content)['data']['name']
     else:
         error_str = utils.safe_get_error_str(response)
@@ -578,19 +552,12 @@ def list_user(search_term = None):
     url = f'{config.ERPNEXT_URL}/api/resource/ZK User?{fields}&limit_start=0&limit=500'
     headers = utils.get_headers()
     
-    #if search_term:
-    #    data['user_name'] = search_term
-    
     response = requests.request("GET", url=url, headers=headers)
-    print("response.status_code:{}".format(response.status_code))
     if response.status_code == 200:
         return 200, json.loads(response._content)['data']
     else:
         error_str = utils.safe_get_error_str(response)
-        if EMPLOYEE_NOT_FOUND_ERROR_MESSAGE in error_str:
-            print('\t'.join(['Error during ERPNext API Call.', str(search_term), error_str]))
-        else:
-            print('\t'.join(['Error during ERPNext API Call.', str(search_term), error_str]))
+        print('\t'.join(['Error during ERPNext API Call.', str(search_term), error_str]))
         return response.status_code, error_str
 
 def list_biodata(user_id):
@@ -603,18 +570,11 @@ def list_biodata(user_id):
     headers = utils.get_headers()
     
     response = requests.request("GET", url=url, headers=headers)
-    print("response.status_code:{}".format(response.status_code))
     if response.status_code == 200:
-        print("==================================")
-        print("response._content:",response._content)
-        print("==================================")
         return 200, json.loads(response._content)['data']
     else:
         error_str = utils.safe_get_error_str(response)
-        if EMPLOYEE_NOT_FOUND_ERROR_MESSAGE in error_str:
-            print('\t'.join(['Error during ERPNext API Call.', str(user_id), error_str]))
-        else:
-            print('\t'.join(['Error during ERPNext API Call.', str(user_id), error_str]))
+        print('\t'.join(['Error during ERPNext API Call.', str(user_id), error_str]))
         return response.status_code, error_str
     
 
@@ -628,18 +588,11 @@ def list_biophoto(user_id):
     headers = utils.get_headers()
     
     response = requests.request("GET", url=url, headers=headers)
-    print("response.status_code:{}".format(response.status_code))
     if response.status_code == 200:
-        print("==================================")
-        print("response._content:",response._content)
-        print("==================================")
         return 200, json.loads(response._content)['data']
     else:
         error_str = utils.safe_get_error_str(response)
-        if EMPLOYEE_NOT_FOUND_ERROR_MESSAGE in error_str:
-            print('\t'.join(['Error during ERPNext API Call.', str(user_id), error_str]))
-        else:
-            print('\t'.join(['Error during ERPNext API Call.', str(user_id), error_str]))
+        print('\t'.join(['Error during ERPNext API Call.', str(user_id), error_str]))
         return response.status_code, error_str
         
     
@@ -671,7 +624,6 @@ def get_bio_data(zk_user, type, no, index):
     
     response = requests.request("GET", url, headers=headers)
     if response.status_code == 200:
-        print("response._content",response._content)
         return 200, json.loads(response._content)['data']
     else:
         error_str = utils.safe_get_error_str(response)
@@ -719,12 +671,10 @@ def create_command(terminal, command, status, after_done=""):
         return 200, str(json.loads(response._content)['data']['name'])
     else:
         error_str = utils.safe_get_error_str(response)
-        if EMPLOYEE_NOT_FOUND_ERROR_MESSAGE in error_str:
-            print('\t'.join(['Error during ERPNext API Call.', str(id), str(terminal), str(command), str(status), error_str]))
-        else:
-            print('\t'.join(['Error during ERPNext API Call.', str(id), str(terminal), str(command), str(status), error_str]))
+        print('\t'.join(['Error during ERPNext API Call.', str(id), str(terminal), str(command), str(status), error_str]))
         return response.status_code, error_str
-    
+
+
 def get_options_dict(data):
     lines = data.split(",")
 
@@ -809,7 +759,6 @@ def do_set_terminal_options(serial_number, options):
 
     response = requests.request("PUT", url, headers=headers, json=data)
     if response.status_code == 200:
-        #print("response.content",response._content)
         return 200, json.loads(response._content)['data']['serial_number']
     else:
         error_str = utils.safe_get_error_str(response)
@@ -830,17 +779,18 @@ def get_push_protocol(serial_number):
     
     return push
 
+
 def get_terminal_count():
     url = f"{config.ERPNEXT_URL}/api/method/thai_zkt.api.count_terminal"
     headers = utils.get_headers()
     response = requests.request("GET", url, headers=headers)
     if response.status_code == 200:
-        #print("response.content",response._content)
         return 200, int(json.loads(response.content)['message'])
     else:
         error_str = utils.safe_get_error_str(response)
         print('\t'.join(['Error during API Call.', error_str]))
         return response.status_code, error_str
+
 
 def get_user_count(serial_number):
     url = f"{config.ERPNEXT_URL}/api/method/thai_zkt.api.count_user"
@@ -850,7 +800,6 @@ def get_user_count(serial_number):
     }
     response = requests.request("GET", url, headers=headers, json=data)
     if response.status_code == 200:
-        #print("response.content",response._content)
         return 200, json.loads(response.content)['message']
     else:
         error_str = utils.safe_get_error_str(response)
@@ -904,7 +853,6 @@ def update_sync_terminal(pin, serial_number):
                 
                 response = requests.request("PUT", url, headers=headers, json=data)
                 if response.status_code == 200:
-                    #print("response.content",response._content)
                     return 200, json.loads(response._content)['data']['name']
                 else:
                     error_str = utils.safe_get_error_str(response)
@@ -922,7 +870,6 @@ def update_sync_terminal(pin, serial_number):
         else:
             response = requests.request("PUT", url, headers=headers, json=data)
             if response.status_code == 200:
-                #print("response.content",response._content)
                 return 200, json.loads(response._content)['data']['name']
             else:
                 error_str = utils.safe_get_error_str(response)
@@ -938,7 +885,6 @@ def delete_user(pin):
     }
     response = requests.request("DELETE", url, headers=headers, json=data)
     if response.status_code == 200:
-        #print("response.content",response._content)
         return 200, response.content
     else:
         error_str = utils.safe_get_error_str(response)
@@ -1016,21 +962,11 @@ def save_attendance(serial_number, logs, event):
 
 def update_compare_screen(serial_number):
 
-    print("update_compare_screen()")
-    
     code, cnts = get_user_count(serial_number)
 
-    print("code:",code)
-
     if code==200:
-        print("cnts:",cnts)
-
         t_user_cnt = cnts["t_user_cnt"]
         t_biodata_cnt = cnts["t_biodata_cnt"]
         t_biophoto_cnt = cnts["t_biophoto_cnt"]
 
-        print("t_user_cnt:",str(t_user_cnt))
-        print("t_biodata_cnt:",str(t_biodata_cnt))
-        print("t_biophoto_cnt:",str(t_biophoto_cnt))
-        
         frappe.publish_realtime("compare_terminal", dict(s_user_cnt=cnts["user_cnt"], s_biodata_cnt=cnts["biodata_cnt"], s_biophoto_cnt=cnts["biophoto_cnt"], t_user_cnt=t_user_cnt, t_biodata_cnt=t_biodata_cnt, t_biophoto_cnt=t_biophoto_cnt))

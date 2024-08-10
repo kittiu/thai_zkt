@@ -48,7 +48,7 @@ def get_context(context):
 		print("info:", info)
 
 		# process args and data
-		ret_msg = service.update_terminal_info(serial_number, info)
+		ret_msg = service.update_terminal_info(serial_number, info) # Generate ZK Terminal.Registry Code
 		if ret_msg == "OK":
 			ret_msg = service.set_terminal_options(serial_number, data)
 

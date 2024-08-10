@@ -91,7 +91,6 @@ mit
 - [X] ZK Bio Photo
       [X] Add/Update Bio Photo
 - [X] ZK Command Page
-- [ ] File : Log
 
 ##### /iclock command
 
