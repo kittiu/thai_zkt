@@ -30,7 +30,7 @@ def get_context(context):
 	print("data:",data)
  
 	if request.method == 'POST':
-			ret_msg = push3.handle_push_post(serial_number)
+		ret_msg = push3.handle_push_post(serial_number)
 
 
 	# send msg back to terminal

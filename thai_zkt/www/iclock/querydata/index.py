@@ -1,5 +1,6 @@
 # Push V.3
 import frappe
+import json
 from urllib.parse import urlparse, parse_qs
 import thai_zkt.www.iclock.service as service
 import thai_zkt.www.iclock.utils as utils
@@ -34,11 +35,13 @@ def get_context(context):
      
 		type = utils.get_arg(args,'type')
 
+		# ZK Terminal Form : Direct Command : Get Info
+		# or Terminal send itself
 		if type == "options":
 			ret_msg = push3.handle_querydata_post_options(serial_number,data)
-   
+
+		# ZK Terminal Form : Direct Command : Get User
 		elif type == "tabledata":
-	
 			is_main = service.is_main_terminal(serial_number)
 
 			tablename = utils.get_arg(args,'tablename')
@@ -50,6 +53,16 @@ def get_context(context):
 			elif tablename == "biophoto":
 				ret_msg = push3.handle_querydata_post_tabledata_biophoto(is_main, data)
 
+		# ZK Terminal Form : Direct Comamnd : Compare With Server
+		# Compare Record Count in Terminal Tables (User, Bio Data, Bio Photo)
+		elif type == "count":
+			tablename = utils.get_arg(args,'tablename')
+			cmd_id = utils.get_arg(args,'cmdid')
+
+			if tablename in ["user","biodata","biophoto"]:
+				push3.handle_querydata_post_count_table(data, tablename, cmd_id)
+
+			service.update_compare_screen(serial_number)	
 
 	# send msg back to terminal
 	print(">>>> RETURN:",ret_msg)

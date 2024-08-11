@@ -4,6 +4,7 @@
 import frappe
 from frappe.model.document import Document
 import thai_zkt.www.iclock.service as service
+import thai_zkt.api as api
 
 class ZKTerminal(Document):
 	pass
@@ -48,4 +49,18 @@ def download_terminal_user(terminal):
     
     push.gen_download_user_cmds(terminal)
     
+    return "OK"
+
+
+@frappe.whitelist()
+def compare_user(terminal):
+
+    for key in ["user","biodata","biophoto"]:
+        if "zk_"+key+"_count" in frappe.session:
+            del frappe.session["zk_"+key+"_count"]
+
+    push = service.get_push_protocol(terminal)
+    
+    push.gen_compare_cmds(terminal)
+
     return "OK"

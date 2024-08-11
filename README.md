@@ -12,16 +12,14 @@ mit
 
 - Serial Number (Frappe "Name")
 - Alias
-- Device Type
+- Is Main
 - Push Version
 - IP Address
 - Model
-- Platform
 - FW Version
 - Last Activity
 - Registry Code
 - Options
-- Is Main
 
 
 ##### ZK User
@@ -63,7 +61,6 @@ mit
 
 - Frappe "Name" (Autoincrement)
 - Terminal (FK "ZK Terminal")
-- Terminal Alias
 - Command
 - Status
 - Sent Time
@@ -81,6 +78,7 @@ mit
         - [X] Clear User (Clear Users in ZK Terminal)
         - [X] Set User (Download Users to ZK Terminal)
         - [X] Get User (Upload Users to Server)
+        - [X] Compare with Server
     - [X] Is Main
         - [X] Add/Update User
 - [X] ZK User Page
@@ -93,7 +91,6 @@ mit
 - [X] ZK Bio Photo
       [X] Add/Update Bio Photo
 - [X] ZK Command Page
-- [ ] File : Log
 
 ##### /iclock command
 

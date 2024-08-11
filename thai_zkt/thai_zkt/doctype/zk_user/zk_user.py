@@ -23,7 +23,7 @@ def sync(users):
 	).run(as_dict=True)
  
 	for terminal in terminals:
-		if terminal.push_version.startswith("3"):
+		if terminal["push_version"].startswith("3"):
 			terminal["push"] = push3
 		else:
 			terminal["push"] = push2
@@ -60,7 +60,7 @@ def predelete(users):
 	user_id_list = json.loads(users)
  
 	dt_ZKUser = frappe.qb.DocType('ZK User')
-	qb = frappe.qb.update(dt_ZKUser).set(dt_ZKUser.main_status, "Pre Delete")
+	qb = frappe.qb.update(dt_ZKUser).set(dt_ZKUser.main_status, "Pre Delete").set(dt_ZKUser.sync_terminal, "")
     
 	qb.where(dt_ZKUser.id.isin(user_id_list)).run()
 

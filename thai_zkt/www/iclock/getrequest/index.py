@@ -55,7 +55,7 @@ def get_command(serial_number):
 	code, terminal = service.get_terminal(serial_number)
 
 	"""
-	Special Command
+	Special Command (Prefix '_')
 	"""
 	dt_ZKCommand = frappe.qb.DocType('ZK Command')
 	cmds = (
@@ -144,7 +144,9 @@ def get_command(serial_number):
 
 	return ret_msg
 
-
+"""
+ZK Command that starts with '_'
+"""
 def get_special_command(serial_number, cmd_id, cmd, terminal):
     
 	ret_msg = "OK"

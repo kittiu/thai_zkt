@@ -5,13 +5,14 @@ import thai_zkt.www.iclock.service as service
 import frappe
 from asyncio.log import logger
 
+"""
+Some Command Values for ZK Command.command
+"""
 CMD_GET_INFO = "_GET_OPTIONS"
 CMD_CLEAR_USERS = "DATA DELETE user Pin=*"
 CMD_GET_USERS = "_CHECK"
 
 def handle_cdata_get(args):
-    
-    print("handle_cdata_get()")
     
     serial_number = utils.get_arg(args,'SN')
     print("Serial Number:",serial_number)
@@ -20,13 +21,11 @@ def handle_cdata_get(args):
     language = utils.get_arg(args,'language')
     pushver = utils.get_arg(args,'pushver')
     pushflag = utils.get_arg(args,'PushOptionsFlag')
-    devicetype = utils.get_arg(args,'DeviceType')
         
     print("Options:",options)
     print("Language:",language)
     print("Push Ver:",pushver)
     print("Push Options Flag:",pushflag)
-    print("Device Type:",devicetype)
     
     ret_msg = "\n".join([f"GET OPTION FROM: {serial_number}"
     , "ServerVer=3.1.2"
@@ -52,8 +51,6 @@ def handle_cdata_get(args):
 
 def handle_push_post(serial_number):
     
-    print("handle_push_post()")
-    
     ret_msg = "\n".join([f"ServerVer=3.1.2"
     , "ServerName=Thai ZKT"
     , "PushVersion=3.1.2"
@@ -73,7 +70,9 @@ def handle_push_post(serial_number):
 
 
 def cmd_get_options(serial_number):
-    print("cmd_get_options()")
+    """
+    ZK Terminal : Direct Command : Get Info
+    """
 
     cmd_line_1 = "GET OPTIONS " + get_options_1()
     status, new_cmd_id_1 = service.create_command(serial_number, cmd_line_1, 'Sent')
@@ -87,11 +86,11 @@ def cmd_get_options(serial_number):
     cmd_line_4 = "GET OPTIONS " + get_options_4()
     status, new_cmd_id_4 = service.create_command(serial_number, cmd_line_4, 'Sent')
 
-    ret_msg = "\d\n\d\n".join(["C:"+ new_cmd_id_1 +":" + cmd_line_1
+    ret_msg = "\r\n\r\n".join(["C:"+ new_cmd_id_1 +":" + cmd_line_1
                              , "C:"+ new_cmd_id_2 +":" + cmd_line_2
                              , "C:"+ new_cmd_id_3 +":" + cmd_line_3
                              , "C:"+ new_cmd_id_4 +":" + cmd_line_4
-                             ]) + "\d\n\d\n"
+                             ]) + "\r\n\r\n"
 
     return ret_msg
 
@@ -112,8 +111,11 @@ def get_options_4():
     ret_msg = "~SerialNumber,FingerFunOn,FvFunOn,FaceFunOn,~MaxFace7Count,~MaxFvCount,EnalbeIRTempDetection,EnableNormalIRTempPass,EnalbeMaskDetection,EnableWearMaskPass,IRTempThreshold,IRTempUnit,EnableUnregisterPass,EnableTriggerAlarm,IRTempCorrection"
     return ret_msg
 
+
 def cmd_check(serial_number):
-    print("cmd_check()")
+    """
+    ZK Terminal : Direct Command : Get User
+    """
 
     cmd_line_1 = "DATA QUERY tablename=user,fielddesc=*,filter=*"
     status, new_cmd_id_1 = service.create_command(serial_number, cmd_line_1, 'Sent')
@@ -127,13 +129,14 @@ def cmd_check(serial_number):
     cmd_line_4 = "DATA QUERY tablename=biophoto,fielddesc=*,filter=*"
     status, new_cmd_id_4 = service.create_command(serial_number, cmd_line_4, 'Sent')
 
-    ret_msg = "\d\n\d\n".join(["C:"+ new_cmd_id_1 +":" + cmd_line_1
+    ret_msg = "\r\n\r\n".join(["C:"+ new_cmd_id_1 +":" + cmd_line_1
                              , "C:"+ new_cmd_id_2 +":" + cmd_line_2
                              , "C:"+ new_cmd_id_3 +":" + cmd_line_3
                              , "C:"+ new_cmd_id_4 +":" + cmd_line_4
-                             ]) + "\d\n\d\n"
+                             ]) + "\r\n\r\n"
 
     return ret_msg
+
 
 
 def handle_querydata_post_options(serial_number,data):
@@ -157,14 +160,18 @@ def handle_querydata_post_options(serial_number,data):
     for word in finalwords:
         print("  -",word)
         entry = word.split("=")
-        if entry[0] == '~Platform':
-            info['~Platform'] = entry[1]
-        elif entry[0] == 'IPAddress':
+        if entry[0] == 'IPAddress':
             info['IPAddress'] = entry[1]
         elif entry[0] == '~DeviceName':
             info['~DeviceName'] = entry[1]
         elif entry[0] == 'FWVersion':
             info['FWVersion'] = entry[1]
+        elif entry[0] == 'UserCount':
+            info['UserCount'] = entry[1]
+        elif entry[0] == 'FaceCount':
+            info['FaceCount'] = entry[1]
+        elif entry[0] == 'FPCount':
+            info['FPCount'] = entry[1]
 
     ret_msg = service.update_terminal_info(serial_number, info)
     ret_msg = service.set_terminal_options(serial_number, data)
@@ -182,7 +189,6 @@ def handle_querydata_post_tabledata_user(is_main, data):
 
     for line in lines:
         words = line.split("\t")
-        print("words:",words)
 
         if words[0].startswith("user"):
             kv = words[0].split("=")
@@ -221,7 +227,6 @@ def handle_querydata_post_tabledata_biodata(is_main, data):
 
     for line in lines:
         words = line.split("\t")
-        print("words:",words)
 
         if words[0].startswith("biodata"):
             kv = words[0].split("=")
@@ -265,7 +270,6 @@ def handle_querydata_post_tabledata_biophoto(is_main, data):
 
     for line in lines:
         words = line.split("\t")
-        print("words:",words)
 
         if words[0].startswith("biophoto"):
             kv = words[0].split("=")
@@ -442,7 +446,10 @@ def create_update_user_command(user, serial_number, add_after_done=False):
 
 
 def create_delete_user_command(user, serial_number, add_after_done=False):
-    
+    """
+    - ZK User List : Action : "Terminals : Pre Delete" need to add_after_done to check whether All Terminals' selected users are deleted
+    - ZK User.sync_terminal is used to collect ZK Terminal that finish deleting selected users
+    """
     after_done = ""
     if add_after_done:
         after_done = '{"action":"update_sync_terminal","pin":'+str(user.get("id"))+'}'
@@ -453,6 +460,9 @@ def create_delete_user_command(user, serial_number, add_after_done=False):
 
 
 def handle_cdata_post_rtlog(serial_number, data):
+    """
+    Handle Attendance Info from Terminal
+    """
     words = data.split("\t")
     print("words:",words)
 
@@ -479,3 +489,38 @@ def handle_cdata_post_rtlog(serial_number, data):
     logs = [device_attendance_log]
 
     service.save_attendance(serial_number, logs, event)
+
+
+def gen_compare_cmds(serial_number):
+
+    cmd_line = get_cmd_compare("user")
+    status, new_cmd_id = service.create_command(serial_number, cmd_line, 'Create')
+
+    cmd_line = get_cmd_compare("biodata"," Type=*")
+    status, new_cmd_id = service.create_command(serial_number, cmd_line, 'Create')
+
+    cmd_line = get_cmd_compare("biophoto")
+    status, new_cmd_id = service.create_command(serial_number, cmd_line, 'Create')
+
+
+def get_cmd_compare(table, params):
+    return 'DATA COUNT '+table+params
+
+
+def handle_querydata_post_count_table(data, table, cmd_id):
+    """
+    Handle Count from Terminal Tables (User, Bio Data, Bio Photo) : ZK Terminal Form : Direct Command : Compare With Server
+    """
+    lines = data.split("\n")
+    print("lines:",lines)
+
+    for line in lines:
+        words = line.split("\t")
+        print("words:",words)
+
+        if words[0].startswith(table):
+            kv = words[0].split("=")
+
+            service.update_command_after_done(cmd_id, '{"action":"save_count","count":'+kv[1]+'}')
+    
+    
