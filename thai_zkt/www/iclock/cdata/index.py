@@ -7,10 +7,12 @@ import thai_zkt.www.iclock.push_protocol_2 as push2
 import thai_zkt.www.iclock.push_protocol_3 as push3
 import json
 
-no_cache = 1
+no_cache = 1  # kittiu: what is no_cache for?
 
+# kittiu: what is following for? I can't find the use.
 device_punch_values_IN = getattr(config, 'device_punch_values_IN', [0,4])
 device_punch_values_OUT = getattr(config, 'device_punch_values_OUT', [1,5])
+# --
 
 def get_context(context):
 	csrf_token = frappe.sessions.get_csrf_token()
@@ -26,11 +28,12 @@ def get_context(context):
 
 	print("args:",args)
 
-	ret_msg = "OK"
+	ret_msg = "OK"  # kittu: do we need to return "OK" ?
 	serial_number = utils.get_arg(args,'SN')
 	print("Serial Number:",serial_number)
-     
+
 	if request.method == 'GET':
+		# kittiu: what this GET doing?
 		options = utils.get_arg(args,'options')
 		language = utils.get_arg(args,'language')
 		pushver = utils.get_arg(args,'pushver')
@@ -56,8 +59,6 @@ def get_context(context):
 		else:
 			ret_msg = push3.handle_cdata_get(args)
 
-
-
 	else: # request.method == "POST"
 		table = utils.get_arg(args,'table')
 		stamp = utils.get_arg(args,'Stamp')
@@ -72,6 +73,7 @@ def get_context(context):
 
 		# ZK Terminal : Direct Command : Get Info
 		if table == "options":
+			# kittiu: What is this doing?
 
 			code, terminal = service.get_terminal(serial_number)
 			print("terminal.push_version:",terminal["push_version"])
@@ -83,11 +85,14 @@ def get_context(context):
 
 		# Get Attendance
 		elif table == "ATTLOG": # push protocol v.2
+			# kittiu: What is this doing?
 
 			push2.handle_cdata_post_attlog(serial_number, data) # attendance
 
 		# ZK Terminal : Direct Command : Get User (User & Bio Photo)
 		# or Terminal sends data itself
+		# kittiu: What above means? terminal sends data itself
+		# kittiu: if not Main, do not add user, bio photo?
 		elif table == "OPERLOG": # push protocol v.2
 
 			is_main = service.is_main_terminal(serial_number)
@@ -122,7 +127,7 @@ def get_context(context):
 				ret_msg = push3.handle_querydata_post_tabledata_biophoto(is_main, data)
 
 		else:
-
+			# kittiu: What is this doing?
 			lines = data.split("\n")
 			print("lines:",lines)
 

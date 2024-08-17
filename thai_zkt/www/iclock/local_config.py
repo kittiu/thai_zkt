@@ -9,7 +9,7 @@
 
 ERPNEXT_API_KEY = 'e5b449d6e84fb6c'
 ERPNEXT_API_SECRET = 'd316585a947c5d5'
-ERPNEXT_URL = 'http://192.168.147.227:8000/'
+# ERPNEXT_URL = 'http://192.168.137.227:8000/'
 
 # operational configs
 LOGS_DIRECTORY = '/tmp' # logs of this script is stored in this directory
