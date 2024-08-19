@@ -1,7 +1,6 @@
 import frappe
 from asyncio.log import logger
 import thai_zkt.www.iclock.utils as utils
-import thai_zkt.www.iclock.local_config as config
 import requests
 import json
 import logging
@@ -263,26 +262,19 @@ def update_terminal_last_activity(serial_number):
         return response.status_code, error_str
     
 def map_user_employee(pin, user_name):
-    # Find Employee that have name as same as ZK User name
-
-    print("---------------------------------", pin, user_name)
-
     fields = 'fields=["name","employee_name"]'
-    # Test with both employee_name and employee_id
-    filters = f'filters=[["employee_name","=","{user_name}"]]'
+    # Test with pin and user_name from the device.
+    field = frappe.conf.zkt_usr_mapping_field
+    filters = f'or_filters=[["{field}","=","{pin}"],["{field}","=","{user_name}"]]'
     url = frappe.utils.get_url(f'/api/resource/Employee?{fields}&{filters}')
     headers = utils.get_headers()
-    
     response = requests.request("GET", url=url, headers=headers)
-
     if response.status_code == 200:
-
         employees = json.loads(response._content)['data']
-        print("--------------------", employees)
+        print("-xxx ", employees)
         for employee in employees:
             # Set Employee.attendance_device_id to ZK User ID
             do_map_user_employee(employee, pin)
-
         return 200, employees
     else:
         error_str = utils.safe_get_error_str(response)

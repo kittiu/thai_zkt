@@ -55,7 +55,7 @@
  ],
  "index_web_pages_for_search": 1,
  "links": [],
- "modified": "2024-08-09 06:41:25.028856",
+ "modified": "2024-08-19 23:04:52.078762",
  "modified_by": "Administrator",
  "module": "Thai ZKT",
  "name": "ZK Command",
@@ -70,7 +70,7 @@
    "print": 1,
    "read": 1,
    "report": 1,
-   "role": "System Manager",
+   "role": "ZK Device Manager",
    "share": 1,
    "write": 1
   }

@@ -54,7 +54,7 @@
  ],
  "index_web_pages_for_search": 1,
  "links": [],
- "modified": "2024-07-27 13:46:57.287575",
+ "modified": "2024-08-19 23:05:32.544420",
  "modified_by": "Administrator",
  "module": "Thai ZKT",
  "name": "ZK Bio Photo",
@@ -69,7 +69,7 @@
    "print": 1,
    "read": 1,
    "report": 1,
-   "role": "System Manager",
+   "role": "ZK Device Manager",
    "share": 1,
    "write": 1
   }

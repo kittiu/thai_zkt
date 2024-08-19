@@ -1,6 +1,5 @@
 import frappe
 from urllib.parse import parse_qs, urlparse
-import thai_zkt.www.iclock.local_config as config
 import thai_zkt.www.iclock.utils as utils
 import thai_zkt.www.iclock.service as service
 import thai_zkt.www.iclock.push_protocol_2 as push2
@@ -8,11 +7,6 @@ import thai_zkt.www.iclock.push_protocol_3 as push3
 import json
 
 no_cache = 1  # kittiu: what is no_cache for?
-
-# kittiu: what is following for? I can't find the use.
-device_punch_values_IN = getattr(config, 'device_punch_values_IN', [0,4])
-device_punch_values_OUT = getattr(config, 'device_punch_values_OUT', [1,5])
-# --
 
 def get_context(context):
 	csrf_token = frappe.sessions.get_csrf_token()
