@@ -16,9 +16,9 @@ EMPLOYEE_INACTIVE_ERROR_MESSAGE = "Transactions cannot be created for an Inactiv
 DUPLICATE_EMPLOYEE_CHECKIN_ERROR_MESSAGE = "This employee already has a log with the same timestamp"
 allowlisted_errors = [EMPLOYEE_NOT_FOUND_ERROR_MESSAGE, EMPLOYEE_INACTIVE_ERROR_MESSAGE, DUPLICATE_EMPLOYEE_CHECKIN_ERROR_MESSAGE]
 
-if hasattr(config,'allowed_exceptions'):
+if frappe.conf.allowed_exceptions:
     allowlisted_errors_temp = []
-    for error_number in config.allowed_exceptions:
+    for error_number in frappe.conf.allowed_exceptions:
         allowlisted_errors_temp.append(allowlisted_errors[error_number-1])
     allowlisted_errors = allowlisted_errors_temp
 
@@ -932,8 +932,8 @@ def save_attendance(serial_number, logs, event):
     print("before setup log")
     attendance_success_log_file = '_'.join(["attendance_success_log", device_id])
     attendance_failed_log_file = '_'.join(["attendance_failed_log", device_id])
-    attendance_success_logger = setup_logger(attendance_success_log_file, '/'.join([config.LOGS_DIRECTORY, attendance_success_log_file])+'.log')
-    attendance_failed_logger = setup_logger(attendance_failed_log_file, '/'.join([config.LOGS_DIRECTORY, attendance_failed_log_file])+'.log')
+    attendance_success_logger = setup_logger(attendance_success_log_file, '/'.join([frappe.conf.zkt_log_dir, attendance_success_log_file])+'.log')
+    attendance_failed_logger = setup_logger(attendance_failed_log_file, '/'.join([frappe.conf.zkt_log_dir, attendance_failed_log_file])+'.log')
     print("after setup log")
 
     for device_attendance_log in logs:
