@@ -63,14 +63,16 @@ def count_user(serial_number):
    			.where(dt_ZKCommand.after_done.like("%save_count%"))
 	).run(as_dict=True)
 
-    if len(cmds) == 3: # User & Bio Data & Bio Photo
+    print("len(cmds):",len(cmds))
+
+    if len(cmds) == 4: # User & Bio Data & Bio Photo
         user_cnt = frappe.db.count('ZK User')
         biodata_cnt = frappe.db.count('ZK Bio Data')
         biophoto_cnt = frappe.db.count('ZK Bio Photo')
 
-        t_user_cnt = -1
-        t_biodata_cnt = -1
-        t_biophoto_cnt = -1
+        t_user_cnt = 0
+        t_biodata_cnt = 0
+        t_biophoto_cnt = 0
 
         for cmd in cmds:
             command = cmd["command"]
@@ -78,12 +80,12 @@ def count_user(serial_number):
             count = after_done["count"]
 
             if "user" in command:
-                t_user_cnt = count 
+                t_user_cnt += count 
             elif "biodata" in command:
-                t_biodata_cnt = count
+                t_biodata_cnt += count
             elif "biophoto" in command:
-                t_biophoto_cnt = count
+                t_biophoto_cnt += count
 
-        return dict(user_cnt=user_cnt, biodata_cnt=biodata_cnt, biophoto_cnt=biophoto_cnt, t_user_cnt=t_user_cnt, t_biodata_cnt=t_biodata_cnt, t_biophoto_cnt=t_biophoto_cnt)
+        return dict(ok=True, user_cnt=user_cnt, biodata_cnt=biodata_cnt, biophoto_cnt=biophoto_cnt, t_user_cnt=t_user_cnt, t_biodata_cnt=t_biodata_cnt, t_biophoto_cnt=t_biophoto_cnt)
     else:
-        return 500,"Not 3"
+        return dict(ok=False)

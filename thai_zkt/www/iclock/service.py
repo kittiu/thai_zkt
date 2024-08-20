@@ -271,7 +271,6 @@ def map_user_employee(pin, user_name):
     response = requests.request("GET", url=url, headers=headers)
     if response.status_code == 200:
         employees = json.loads(response._content)['data']
-        print("-xxx ", employees)
         for employee in employees:
             # Set Employee.attendance_device_id to ZK User ID
             do_map_user_employee(employee, pin)
@@ -792,11 +791,16 @@ def get_user_count(serial_number):
     url = frappe.utils.get_url("/api/method/thai_zkt.api.count_user")
     headers = utils.get_headers()
     data = {
-        'serial_number':serial_number
+        'serial_number': serial_number
     }
     response = requests.request("GET", url, headers=headers, json=data)
+    print("response.status_code:",response.status_code)
     if response.status_code == 200:
-        return 200, json.loads(response.content)['message']
+        data = json.loads(response.content)['message']
+        if data['ok']:
+            return 200, json.loads(response.content)['message']
+        else:
+            return 404, "Not Found"
     else:
         error_str = utils.safe_get_error_str(response)
         print('\t'.join(['Error during API Call.', error_str]))
