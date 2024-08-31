@@ -149,6 +149,12 @@ fixtures = [
 # Scheduled Tasks
 # ---------------
 
+scheduler_events = {
+	"daily": [
+		"thai_zkt.custom.shift_type.update_last_sync_of_checkin",
+	],
+}
+
 # scheduler_events = {
 # 	"all": [
 # 		"thai_zkt.tasks.all"
