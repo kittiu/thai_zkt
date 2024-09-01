@@ -8,14 +8,16 @@
  "engine": "InnoDB",
  "field_order": [
   "serial_number",
-  "alias",
-  "is_main",
   "push_version",
   "ip_address",
   "model",
+  "column_break_jszp",
+  "alias",
+  "is_main",
+  "registry_code",
   "fw_version",
   "last_activity",
-  "registry_code",
+  "section_break_otfv",
   "options"
  ],
  "fields": [
@@ -30,6 +32,7 @@
   {
    "fieldname": "alias",
    "fieldtype": "Data",
+   "in_list_view": 1,
    "label": "Alias",
    "reqd": 1
   },
@@ -72,12 +75,21 @@
    "default": "0",
    "fieldname": "is_main",
    "fieldtype": "Check",
+   "in_list_view": 1,
    "label": "Is Main"
+  },
+  {
+   "fieldname": "column_break_jszp",
+   "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "section_break_otfv",
+   "fieldtype": "Section Break"
   }
  ],
  "index_web_pages_for_search": 1,
  "links": [],
- "modified": "2024-08-19 23:04:26.388838",
+ "modified": "2024-09-01 10:37:48.876198",
  "modified_by": "Administrator",
  "module": "Thai ZKT",
  "name": "ZK Terminal",

@@ -8,11 +8,12 @@
  "engine": "InnoDB",
  "field_order": [
   "id",
-  "user_name",
   "password",
+  "user_name",
+  "main_status",
+  "column_break_ukgp",
   "privilege",
   "group",
-  "main_status",
   "sync_terminal"
  ],
  "fields": [
@@ -27,6 +28,7 @@
   {
    "fieldname": "user_name",
    "fieldtype": "Data",
+   "in_list_view": 1,
    "label": "User Name"
   },
   {
@@ -35,19 +37,24 @@
    "label": "Password"
   },
   {
+   "default": "0",
    "fieldname": "privilege",
    "fieldtype": "Data",
-   "label": "Privilege"
+   "label": "Privilege",
+   "reqd": 1
   },
   {
+   "default": "1",
    "fieldname": "group",
    "fieldtype": "Data",
-   "label": "Group"
+   "label": "Group",
+   "reqd": 1
   },
   {
    "default": "Add",
    "fieldname": "main_status",
-   "fieldtype": "Data",
+   "fieldtype": "Select",
+   "in_list_view": 1,
    "label": "Main Status",
    "options": "Sync\nAdd\nPre Delete",
    "reqd": 1
@@ -56,11 +63,15 @@
    "fieldname": "sync_terminal",
    "fieldtype": "Long Text",
    "label": "Sync Terminal"
+  },
+  {
+   "fieldname": "column_break_ukgp",
+   "fieldtype": "Column Break"
   }
  ],
  "index_web_pages_for_search": 1,
  "links": [],
- "modified": "2024-08-19 23:05:03.232883",
+ "modified": "2024-09-01 15:42:25.758212",
  "modified_by": "Administrator",
  "module": "Thai ZKT",
  "name": "ZK User",
@@ -82,5 +93,6 @@
  ],
  "sort_field": "modified",
  "sort_order": "DESC",
- "states": []
+ "states": [],
+ "title_field": "id"
 }

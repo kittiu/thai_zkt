@@ -15,9 +15,11 @@ EMPLOYEE_INACTIVE_ERROR_MESSAGE = "Transactions cannot be created for an Inactiv
 DUPLICATE_EMPLOYEE_CHECKIN_ERROR_MESSAGE = "This employee already has a log with the same timestamp"
 allowlisted_errors = [EMPLOYEE_NOT_FOUND_ERROR_MESSAGE, EMPLOYEE_INACTIVE_ERROR_MESSAGE, DUPLICATE_EMPLOYEE_CHECKIN_ERROR_MESSAGE]
 
-if frappe.conf.allowed_exceptions:
+allowed_exceptions = [1, 2, 3]
+
+if allowed_exceptions:
     allowlisted_errors_temp = []
-    for error_number in frappe.conf.allowed_exceptions:
+    for error_number in allowed_exceptions:
         allowlisted_errors_temp.append(allowlisted_errors[error_number-1])
     allowlisted_errors = allowlisted_errors_temp
 
@@ -261,44 +263,44 @@ def update_terminal_last_activity(serial_number):
         print('\t'.join(['Error during ERPNext API Call.', str(serial_number), now.__str__,  error_str]))
         return response.status_code, error_str
     
-def map_user_employee(pin, user_name):
-    fields = 'fields=["name","employee_name"]'
-    # Test with pin and user_name from the device.
-    field = frappe.conf.zkt_usr_mapping_field
-    filters = f'or_filters=[["{field}","=","{pin}"],["{field}","=","{user_name}"]]'
-    url = frappe.utils.get_url(f'/api/resource/Employee?{fields}&{filters}')
-    headers = utils.get_headers()
-    response = requests.request("GET", url=url, headers=headers)
-    if response.status_code == 200:
-        employees = json.loads(response._content)['data']
-        for employee in employees:
-            # Set Employee.attendance_device_id to ZK User ID
-            do_map_user_employee(employee, pin)
-        return 200, employees
-    else:
-        error_str = utils.safe_get_error_str(response)
-        print('\t'.join(['Error during ERPNext API Call.', str(pin), user_name, error_str]))
-        return response.status_code, error_str
+# def map_user_employee(pin, user_name):
+#     fields = 'fields=["name","employee_name"]'
+#     # Test with pin and user_name from the device.
+#     field = frappe.conf.zkt_usr_mapping_field
+#     filters = f'or_filters=[["{field}","=","{pin}"],["{field}","=","{user_name}"]]'
+#     url = frappe.utils.get_url(f'/api/resource/Employee?{fields}&{filters}')
+#     headers = utils.get_headers()
+#     response = requests.request("GET", url=url, headers=headers)
+#     if response.status_code == 200:
+#         employees = json.loads(response._content)['data']
+#         for employee in employees:
+#             # Set Employee.attendance_device_id to ZK User ID
+#             do_map_user_employee(employee, pin)
+#         return 200, employees
+#     else:
+#         error_str = utils.safe_get_error_str(response)
+#         print('\t'.join(['Error during ERPNext API Call.', str(pin), user_name, error_str]))
+#         return response.status_code, error_str
 
 
-def do_map_user_employee(employee, pin):
-    """
-    Example: do_map_user_employee('HR-EMP-0001',1)
-    """
-    url = frappe.utils.get_url(f"/api/resource/Employee/{employee['name']}")
-    headers = utils.get_headers()
+# def do_map_user_employee(employee, pin):
+#     """
+#     Example: do_map_user_employee('HR-EMP-0001',1)
+#     """
+#     url = frappe.utils.get_url(f"/api/resource/Employee/{employee['name']}")
+#     headers = utils.get_headers()
 
-    data = {
-        'attendance_device_id' : str(pin)
-	}
+#     data = {
+#         'attendance_device_id' : str(pin)
+# 	}
 
-    response = requests.request("PUT", url, headers=headers, json=data)
-    if response.status_code == 200:
-        return 200, json.loads(response._content)['data']['name']
-    else:
-        error_str = utils.safe_get_error_str(response)
-        print('\t'.join(['Error during ERPNext API Call.', employee['name'], employee['employee_name'], str(pin),  error_str]))
-        return response.status_code, error_str
+#     response = requests.request("PUT", url, headers=headers, json=data)
+#     if response.status_code == 200:
+#         return 200, json.loads(response._content)['data']['name']
+#     else:
+#         error_str = utils.safe_get_error_str(response)
+#         print('\t'.join(['Error during ERPNext API Call.', employee['name'], employee['employee_name'], str(pin),  error_str]))
+#         return response.status_code, error_str
 
 
 def save_user(pin, user_name, user_pri, user_password, user_grp):
@@ -312,8 +314,8 @@ def save_user(pin, user_name, user_pri, user_password, user_grp):
     else:
         erpnext_status_code, erpnext_message = create_user(pin, user_name, user_pri, user_password, user_grp)
 
-    if erpnext_status_code == 200:
-        map_user_employee(pin, user_name)
+    # if erpnext_status_code == 200:
+    #     map_user_employee(pin, user_name)
 
     return erpnext_status_code, erpnext_message
 

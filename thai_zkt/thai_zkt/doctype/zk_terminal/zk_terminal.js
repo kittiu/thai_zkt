@@ -33,7 +33,7 @@ function genNewCode() {
 }
 
 function addBtnGetInfo(frm,menu_name) {
-    frm.add_custom_button(__("Get Info"), function() {
+    frm.add_custom_button(__("Get Server Info"), function() {
         frappe.call({
             method: 'thai_zkt.thai_zkt.doctype.zk_terminal.zk_terminal.get_terminal_info',
             args: {
@@ -51,7 +51,7 @@ function addBtnGetInfo(frm,menu_name) {
 }
 
 function addBtnClearUsers(frm,menu_name) {
-    frm.add_custom_button(__("Clear Users"), function() {
+    frm.add_custom_button(__("Clear All Terminal Users"), function() {
         frappe.confirm(
             'Are you sure to Clear Users in Terminal "'+frm.doc.name+'"?',
             function(){
@@ -79,9 +79,9 @@ function addBtnClearUsers(frm,menu_name) {
 }
 
 function addBtnSetUsers(frm,menu_name) {
-    frm.add_custom_button(__("Set Users"), function() {
+    frm.add_custom_button(__("Push All Users to Terminal"), function() {
         frappe.confirm(
-            'Are you sure to Set Users to Terminal "'+frm.doc.name+'"?',
+            'Are you sure to Push Users to Terminal "'+frm.doc.name+'"?',
             function(){
                 window.close();
 
@@ -107,9 +107,9 @@ function addBtnSetUsers(frm,menu_name) {
 }
 
 function addBtnGetUsers(frm,menu_name) {
-    frm.add_custom_button(__("Get Users"), function() {
+    frm.add_custom_button(__("Pull All Users from Terminal"), function() {
         frappe.confirm(
-            'Are you sure to Get Users from Terminal "'+frm.doc.name+'"?',
+            'Are you sure to Pull Users from Terminal "'+frm.doc.name+'"?',
             function(){
                 window.close();
 
@@ -135,7 +135,7 @@ function addBtnGetUsers(frm,menu_name) {
 }
 
 function addBtnCmpWithSvr(frm,menu_name) {
-    frm.add_custom_button(__("Compare With Server"), function() {
+    frm.add_custom_button(__("Compare Users With Server"), function() {
         frappe.confirm(
             'Are you sure to Compare User in Terminal '+frm.doc.name+' with Server?',
             function(){
@@ -195,11 +195,11 @@ frappe.ui.form.on("ZK Terminal", {
 
         menu_name = "Direct Command"
 
-        addBtnGetInfo(frm,menu_name);
+        addBtnCmpWithSvr(frm,menu_name);
+        addBtnGetUsers(frm,menu_name);
         addBtnClearUsers(frm,menu_name);
         addBtnSetUsers(frm,menu_name);
-        addBtnGetUsers(frm,menu_name);
-        addBtnCmpWithSvr(frm,menu_name);
+        addBtnGetInfo(frm,menu_name);
 
         showDashboard(frm);
     }
