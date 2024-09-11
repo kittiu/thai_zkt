@@ -32,7 +32,9 @@ class ZKUser(Document):
 			limit=1,
 		)
 		if employee:
-			frappe.db.set_value("Employee", employee[0], "attendance_device_id", self.id)
+			doc = frappe.get_doc("Employee", employee[0])
+			if doc.attendance_device_id != self.id:
+				frappe.db.set_value("Employee", employee[0], "attendance_device_id", self.id)
 
 	def on_trash(self):
 		# Delete all linked document first
