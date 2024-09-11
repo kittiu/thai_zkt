@@ -763,10 +763,10 @@ def do_set_terminal_options(serial_number, options):
         return response.status_code, error_str
 
 
-def get_push_protocol(serial_number):
-    
+def get_push_protocol(serial_number):    
     code, terminal = get_terminal(serial_number)
-    
+    if code != 200:
+        frappe.throw(terminal)
     if terminal["push_version"].startswith("3"):
         print(serial_number,": Push Protocol V.3")
         push = push3
