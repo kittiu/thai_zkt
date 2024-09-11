@@ -9,9 +9,11 @@
   "zk_user",
   "no",
   "index",
+  "column_break_jpkx",
   "type",
   "file_name",
   "size",
+  "column_break_oafk",
   "content"
  ],
  "fields": [
@@ -50,11 +52,19 @@
    "fieldname": "size",
    "fieldtype": "Int",
    "label": "Size"
+  },
+  {
+   "fieldname": "column_break_jpkx",
+   "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "column_break_oafk",
+   "fieldtype": "Column Break"
   }
  ],
  "index_web_pages_for_search": 1,
  "links": [],
- "modified": "2024-07-27 13:46:57.287575",
+ "modified": "2024-09-01 17:10:15.973214",
  "modified_by": "Administrator",
  "module": "Thai ZKT",
  "name": "ZK Bio Photo",
@@ -69,7 +79,7 @@
    "print": 1,
    "read": 1,
    "report": 1,
-   "role": "System Manager",
+   "role": "ZK Device Manager",
    "share": 1,
    "write": 1
   }

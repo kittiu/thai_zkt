@@ -1,6 +1,5 @@
 import frappe
 from urllib.parse import urlparse, parse_qs
-import thai_zkt.www.iclock.local_config as config
 import thai_zkt.www.iclock.utils as utils
 
 no_cache = 1

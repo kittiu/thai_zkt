@@ -11,6 +11,17 @@ website_route_rules = [
 ]
 
 
+fixtures = [
+    {
+        "doctype": "Role",
+        "filters": [["name", "in", ("ZK Device Manager",)]]
+    },
+    {
+        "doctype": "Custom DocPerm",
+        "filters": [["name", "in", ("4hem8blmso", "4roqib0d47")]]
+    },
+]
+
 # Includes in <head>
 # ------------------
 
@@ -137,6 +148,12 @@ website_route_rules = [
 
 # Scheduled Tasks
 # ---------------
+
+scheduler_events = {
+	"daily": [
+		"thai_zkt.custom.shift_type.update_last_sync_of_checkin",
+	],
+}
 
 # scheduler_events = {
 # 	"all": [

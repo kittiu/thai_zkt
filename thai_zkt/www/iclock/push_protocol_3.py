@@ -1,5 +1,4 @@
 from urllib.parse import parse_qs, urlparse
-import thai_zkt.www.iclock.local_config as config
 import thai_zkt.www.iclock.utils as utils
 import thai_zkt.www.iclock.service as service
 import frappe
@@ -496,14 +495,17 @@ def gen_compare_cmds(serial_number):
     cmd_line = get_cmd_compare("user")
     status, new_cmd_id = service.create_command(serial_number, cmd_line, 'Create')
 
-    cmd_line = get_cmd_compare("biodata"," Type=*")
+    cmd_line = get_cmd_compare("biodata"," Type=1")
+    status, new_cmd_id = service.create_command(serial_number, cmd_line, 'Create')
+
+    cmd_line = get_cmd_compare("biodata"," Type=9")
     status, new_cmd_id = service.create_command(serial_number, cmd_line, 'Create')
 
     cmd_line = get_cmd_compare("biophoto")
     status, new_cmd_id = service.create_command(serial_number, cmd_line, 'Create')
 
 
-def get_cmd_compare(table, params):
+def get_cmd_compare(table, params=""):
     return 'DATA COUNT '+table+params
 
 

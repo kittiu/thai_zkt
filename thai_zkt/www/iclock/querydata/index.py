@@ -8,6 +8,8 @@ import thai_zkt.www.iclock.push_protocol_3 as push3
 
 no_cache = 1
 
+# kittiu: there is no push2 in this file? What is the impact then?
+
 def get_context(context):
 	csrf_token = frappe.sessions.get_csrf_token()
 	frappe.db.commit()  # nosempgrep

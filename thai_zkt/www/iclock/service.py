@@ -1,7 +1,6 @@
 import frappe
 from asyncio.log import logger
 import thai_zkt.www.iclock.utils as utils
-import thai_zkt.www.iclock.local_config as config
 import requests
 import json
 import logging
@@ -16,9 +15,11 @@ EMPLOYEE_INACTIVE_ERROR_MESSAGE = "Transactions cannot be created for an Inactiv
 DUPLICATE_EMPLOYEE_CHECKIN_ERROR_MESSAGE = "This employee already has a log with the same timestamp"
 allowlisted_errors = [EMPLOYEE_NOT_FOUND_ERROR_MESSAGE, EMPLOYEE_INACTIVE_ERROR_MESSAGE, DUPLICATE_EMPLOYEE_CHECKIN_ERROR_MESSAGE]
 
-if hasattr(config,'allowed_exceptions'):
+allowed_exceptions = [1, 2, 3]
+
+if allowed_exceptions:
     allowlisted_errors_temp = []
-    for error_number in config.allowed_exceptions:
+    for error_number in allowed_exceptions:
         allowlisted_errors_temp.append(allowlisted_errors[error_number-1])
     allowlisted_errors = allowlisted_errors_temp
 
@@ -27,7 +28,7 @@ def update_command_list_status(cmd_id_list, status):
     Example: update_command_list_status([1,2,3], "Sent")
     """
     
-    url = f"{config.ERPNEXT_URL}/api/method/thai_zkt.api.update_command_list_status"
+    url = frappe.utils.get_url("/api/method/thai_zkt.api.update_command_list_status")
     headers = utils.get_headers()
     data = {
         "cmd_id_list":cmd_id_list,
@@ -47,7 +48,7 @@ def update_command_status(cmd_id, status):
     """
     Example: update_command_status(1, "Sent")
     """
-    url = f"{config.ERPNEXT_URL}/api/resource/ZK Command/{cmd_id}"
+    url = frappe.utils.get_url(f"/api/resource/ZK Command/{cmd_id}")
     headers = utils.get_headers()
 
     data = {
@@ -77,7 +78,7 @@ def update_command_after_done(cmd_id, value):
     """
     Example: update_command_status(1, "Sent")
     """
-    url = f"{config.ERPNEXT_URL}/api/resource/ZK Command/{cmd_id}"
+    url = frappe.utils.get_url(f"/api/resource/ZK Command/{cmd_id}")
     headers = utils.get_headers()
 
     data = {
@@ -136,7 +137,7 @@ def save_terminal(serial_number, info):
     """
     Example: save_terminal('CCK24212349', info)
     """
-    url = f"{config.ERPNEXT_URL}/api/resource/ZK Terminal/" + serial_number
+    url = frappe.utils.get_url(f"/api/resource/ZK Terminal/{serial_number}")
     headers = utils.get_headers()
 
     data = {}
@@ -176,7 +177,7 @@ def create_attendance(employee_field_value, timestamp, device_id=None, log_type=
     """
     Example: create_attendance('12349',datetime.datetime.now(),'HO1','IN')
     """
-    url = f"{config.ERPNEXT_URL}/api/method/hrms.hr.doctype.employee_checkin.employee_checkin.add_log_based_on_employee_field"
+    url = frappe.utils.get_url("/api/method/hrms.hr.doctype.employee_checkin.employee_checkin.add_log_based_on_employee_field")
     headers = utils.get_headers()
 
     data = {
@@ -198,7 +199,7 @@ def get_terminal(serial_number):
     """
     Example: get_terminal('CBE13422349')
     """
-    url = f"{config.ERPNEXT_URL}/api/resource/ZK Terminal/" + serial_number
+    url = frappe.utils.get_url(f"/api/resource/ZK Terminal/{serial_number}")
     headers = utils.get_headers()
     response = requests.request("GET", url, headers=headers)
     print("response:",response)
@@ -214,7 +215,7 @@ def get_command(id):
     """
     Example: get_command(1)
     """
-    url = f"{config.ERPNEXT_URL}/api/resource/ZK Command/" + id
+    url = frappe.utils.get_url(f"/api/resource/ZK Command/{id}")
     headers = utils.get_headers()
     
     response = requests.request("GET", url, headers=headers)
@@ -245,7 +246,7 @@ def update_terminal_last_activity(serial_number):
     """
     Example: update_terminal_last_activity('CCK24212349')
     """
-    url = f"{config.ERPNEXT_URL}/api/resource/ZK Terminal/" + serial_number
+    url = frappe.utils.get_url(f"/api/resource/ZK Terminal/{serial_number}")
     headers = utils.get_headers()
 
     now = datetime.datetime.now()
@@ -262,48 +263,44 @@ def update_terminal_last_activity(serial_number):
         print('\t'.join(['Error during ERPNext API Call.', str(serial_number), now.__str__,  error_str]))
         return response.status_code, error_str
     
-def map_user_employee(pin, user_name):
-    # Find Employee that have name as same as ZK User name
-
-    fields = 'fields=["name","employee_name"]'
-    filters = f'filters=[["employee_name","=","{user_name}"]]'
-    url = f'{config.ERPNEXT_URL}/api/resource/Employee?{fields}&{filters}'
-    headers = utils.get_headers()
-    
-    response = requests.request("GET", url=url, headers=headers)
-
-    if response.status_code == 200:
-
-        employees = json.loads(response._content)['data']
-        for employee in employees:
-            # Set Employee.attendance_device_id to ZK User ID
-            do_map_user_employee(employee, pin)
-
-        return 200, employees
-    else:
-        error_str = utils.safe_get_error_str(response)
-        print('\t'.join(['Error during ERPNext API Call.', str(pin), user_name, error_str]))
-        return response.status_code, error_str
+# def map_user_employee(pin, user_name):
+#     fields = 'fields=["name","employee_name"]'
+#     # Test with pin and user_name from the device.
+#     field = frappe.conf.zkt_usr_mapping_field
+#     filters = f'or_filters=[["{field}","=","{pin}"],["{field}","=","{user_name}"]]'
+#     url = frappe.utils.get_url(f'/api/resource/Employee?{fields}&{filters}')
+#     headers = utils.get_headers()
+#     response = requests.request("GET", url=url, headers=headers)
+#     if response.status_code == 200:
+#         employees = json.loads(response._content)['data']
+#         for employee in employees:
+#             # Set Employee.attendance_device_id to ZK User ID
+#             do_map_user_employee(employee, pin)
+#         return 200, employees
+#     else:
+#         error_str = utils.safe_get_error_str(response)
+#         print('\t'.join(['Error during ERPNext API Call.', str(pin), user_name, error_str]))
+#         return response.status_code, error_str
 
 
-def do_map_user_employee(employee, pin):
-    """
-    Example: do_map_user_employee('HR-EMP-0001',1)
-    """
-    url = f"{config.ERPNEXT_URL}/api/resource/Employee/" + employee['name']
-    headers = utils.get_headers()
+# def do_map_user_employee(employee, pin):
+#     """
+#     Example: do_map_user_employee('HR-EMP-0001',1)
+#     """
+#     url = frappe.utils.get_url(f"/api/resource/Employee/{employee['name']}")
+#     headers = utils.get_headers()
 
-    data = {
-        'attendance_device_id' : str(pin)
-	}
+#     data = {
+#         'attendance_device_id' : str(pin)
+# 	}
 
-    response = requests.request("PUT", url, headers=headers, json=data)
-    if response.status_code == 200:
-        return 200, json.loads(response._content)['data']['name']
-    else:
-        error_str = utils.safe_get_error_str(response)
-        print('\t'.join(['Error during ERPNext API Call.', employee['name'], employee['employee_name'], str(pin),  error_str]))
-        return response.status_code, error_str
+#     response = requests.request("PUT", url, headers=headers, json=data)
+#     if response.status_code == 200:
+#         return 200, json.loads(response._content)['data']['name']
+#     else:
+#         error_str = utils.safe_get_error_str(response)
+#         print('\t'.join(['Error during ERPNext API Call.', employee['name'], employee['employee_name'], str(pin),  error_str]))
+#         return response.status_code, error_str
 
 
 def save_user(pin, user_name, user_pri, user_password, user_grp):
@@ -317,8 +314,8 @@ def save_user(pin, user_name, user_pri, user_password, user_grp):
     else:
         erpnext_status_code, erpnext_message = create_user(pin, user_name, user_pri, user_password, user_grp)
 
-    if erpnext_status_code == 200:
-        map_user_employee(pin, user_name)
+    # if erpnext_status_code == 200:
+    #     map_user_employee(pin, user_name)
 
     return erpnext_status_code, erpnext_message
 
@@ -327,7 +324,7 @@ def update_user(user_id, user_name, user_pri, user_password, user_grp):
     """
     Example: update_user('1','Roger Power', '1', 'abc', '1')
     """
-    url = f"{config.ERPNEXT_URL}/api/resource/ZK User/{user_id}"
+    url = frappe.utils.get_url(f"/api/resource/ZK User/{user_id}")
     headers = utils.get_headers()
 
     data = {
@@ -352,7 +349,7 @@ def create_user(user_id, user_name, user_pri, user_password, user_grp):
     """
     Example: create_user('1','Roger Power', '1', 'abc', '1')
     """
-    url = f"{config.ERPNEXT_URL}/api/resource/ZK User"
+    url = frappe.utils.get_url("/api/resource/ZK User")
     headers = utils.get_headers()
 
     data = {
@@ -377,7 +374,7 @@ def update_user_main_status(zk_user):
     """
     Example: update_user_main_status('1')
     """
-    url = f"{config.ERPNEXT_URL}/api/resource/ZK User/{zk_user}"
+    url = frappe.utils.get_url(f"/api/resource/ZK User/{zk_user}")
     headers = utils.get_headers()
 
     data = {
@@ -419,7 +416,7 @@ def update_bio_data(name, zk_user, type, no, index, valid, format, major_version
     """
     Example: update_bio_data('CCK24212349', 1, 0, 0, 0, 0, 35, 10, 'dsfkcdxzpsalf...')
     """
-    url = f"{config.ERPNEXT_URL}/api/resource/ZK Bio Data/{name}"
+    url = frappe.utils.get_url(f"/api/resource/ZK Bio Data/{name}")
     headers = utils.get_headers()
 
     data = {
@@ -447,7 +444,7 @@ def create_bio_data(zk_user, type, no, index, valid, format, major_version, mino
     """
     Example: create_bio_data('CCK24212349', 1, 0, 0, 0, 0, 35, 10, 'dsfkcdxzpsalf...')
     """
-    url = f"{config.ERPNEXT_URL}/api/resource/ZK Bio Data"
+    url = frappe.utils.get_url("/api/resource/ZK Bio Data")
     headers = utils.get_headers()
 
     data = {
@@ -496,7 +493,7 @@ def update_bio_photo(name, zk_user, type, no, index, file_name, size, content):
     """
     Example: update_bio_photo('CCK24212349', 1, 0, 0, '1.jpg', 10055, 'sdfkjxzlierl3234...')
     """
-    url = f"{config.ERPNEXT_URL}/api/resource/ZK Bio Photo/{name}"
+    url = frappe.utils.get_url(f"/api/resource/ZK Bio Photo/{name}")
     headers = utils.get_headers()
 
     data = {
@@ -522,7 +519,7 @@ def create_bio_photo(zk_user, type, no, index, file_name, size, content):
     """
     Example: create_bio_photo('CCK24212349', 1, 0, 0, '1.jpg', 10055, 'sdfkjxzlierl3234...')
     """
-    url = f"{config.ERPNEXT_URL}/api/resource/ZK Bio Photo"
+    url = frappe.utils.get_url("/api/resource/ZK Bio Photo")
     headers = utils.get_headers()
 
     data = {
@@ -544,12 +541,12 @@ def create_bio_photo(zk_user, type, no, index, file_name, size, content):
         return response.status_code, error_str    
     
     
-def list_user(search_term = None):
+def list_user(search_term=None):
     """
     Example: list_user('CBE13422349')
     """
     fields = 'fields=["id","user_name","password","privilege","group"]'
-    url = f'{config.ERPNEXT_URL}/api/resource/ZK User?{fields}&limit_start=0&limit=500'
+    url = frappe.utils.get_url(f'/api/resource/ZK User?{fields}&limit_start=0&limit=500')
     headers = utils.get_headers()
     
     response = requests.request("GET", url=url, headers=headers)
@@ -566,7 +563,7 @@ def list_biodata(user_id):
     """
     fields = 'fields=["zk_user","type","no","index","valid","valid","format","major_version","minor_version","template"]'
     filters = f'filters=[["zk_user","=",{user_id}]]'
-    url = f'{config.ERPNEXT_URL}/api/resource/ZK Bio Data?{fields}&{filters}'
+    url = frappe.utils.get_url(f'/api/resource/ZK Bio Data?{fields}&{filters}')
     headers = utils.get_headers()
     
     response = requests.request("GET", url=url, headers=headers)
@@ -584,7 +581,7 @@ def list_biophoto(user_id):
     """
     fields = 'fields=["zk_user","type","no","index","file_name","size","content"]'
     filters = f'filters=[["zk_user","=",{user_id}]]'
-    url = f'{config.ERPNEXT_URL}/api/resource/ZK Bio Photo?{fields}&{filters}'
+    url = frappe.utils.get_url(f'/api/resource/ZK Bio Photo?{fields}&{filters}')
     headers = utils.get_headers()
     
     response = requests.request("GET", url=url, headers=headers)
@@ -600,7 +597,7 @@ def get_user(name):
     """
     Example: list_user(1)
     """
-    url = f'{config.ERPNEXT_URL}/api/resource/ZK User/{name}'
+    url = frappe.utils.get_url(f'/api/resource/ZK User/{name}')
     headers = utils.get_headers()
     
     response = requests.request("GET", url, headers=headers)
@@ -619,7 +616,7 @@ def get_bio_data(zk_user, type, no, index):
     print("get_bio_dat:",zk_user, type, no ,index)
     fields = 'fields=["name"]'
     filters = f'filters=[["zk_user","=",{zk_user}],["type","=",{type}],["no","=",{no}],["index","=",{index}]]'
-    url = f'{config.ERPNEXT_URL}/api/resource/ZK Bio Data?{fields}&{filters}'
+    url = frappe.utils.get_url(f'/api/resource/ZK Bio Data?{fields}&{filters}')
     headers = utils.get_headers()
     
     response = requests.request("GET", url, headers=headers)
@@ -637,7 +634,7 @@ def get_bio_photo(zk_user, type, no, index):
     """
     fields = 'fields=["name"]'
     filters = f'filters=[["zk_user","=",{zk_user}],["type","=",{type}],["no","=",{no}],["index","=",{index}]]'
-    url = f'{config.ERPNEXT_URL}/api/resource/ZK Bio Photo?{fields}&{filters}'
+    url = frappe.utils.get_url(f'/api/resource/ZK Bio Photo?{fields}&{filters}')
     headers = utils.get_headers()
     
     response = requests.request("GET", url, headers=headers)
@@ -654,7 +651,7 @@ def create_command(terminal, command, status, after_done=""):
     """
     Example: create_command(1,'CSE33412349', 'UPDATE USERINFO', 'Sent')
     """
-    url = f"{config.ERPNEXT_URL}/api/resource/ZK Command"
+    url = frappe.utils.get_url("/api/resource/ZK Command")
     headers = utils.get_headers()
 
     data = {
@@ -748,7 +745,7 @@ def do_set_terminal_options(serial_number, options):
     """
     Example: do_set_terminal_options("CISK2239023", "~SerialNumber=CRJP234760207,FirmVer=ZMM510-NF24VB-Ver1.3.9,~DeviceName=SpeedFace-V3L/ID,LockCount=1,ReaderCount=2,AuxInCount=1,AuxOutCount=0,MachineType=101,~IsOnlyRFMachine=0,~MaxUserCount=30,~MaxAttLogCount=20")
     """
-    url = f"{config.ERPNEXT_URL}/api/resource/ZK Terminal/{serial_number}"
+    url = frappe.utils.get_url(f"/api/resource/ZK Terminal/{serial_number}")
     headers = utils.get_headers()
 
     data = {
@@ -781,7 +778,7 @@ def get_push_protocol(serial_number):
 
 
 def get_terminal_count():
-    url = f"{config.ERPNEXT_URL}/api/method/thai_zkt.api.count_terminal"
+    url = frappe.utils.get_url("/api/method/thai_zkt.api.count_terminal")
     headers = utils.get_headers()
     response = requests.request("GET", url, headers=headers)
     if response.status_code == 200:
@@ -793,14 +790,19 @@ def get_terminal_count():
 
 
 def get_user_count(serial_number):
-    url = f"{config.ERPNEXT_URL}/api/method/thai_zkt.api.count_user"
+    url = frappe.utils.get_url("/api/method/thai_zkt.api.count_user")
     headers = utils.get_headers()
     data = {
-        'serial_number':serial_number
+        'serial_number': serial_number
     }
     response = requests.request("GET", url, headers=headers, json=data)
+    print("response.status_code:",response.status_code)
     if response.status_code == 200:
-        return 200, json.loads(response.content)['message']
+        data = json.loads(response.content)['message']
+        if data['ok']:
+            return 200, json.loads(response.content)['message']
+        else:
+            return 404, "Not Found"
     else:
         error_str = utils.safe_get_error_str(response)
         print('\t'.join(['Error during API Call.', error_str]))
@@ -825,7 +827,7 @@ def update_sync_terminal(pin, serial_number):
         finallines.append(serial_number)
         sync_terminal = ",".join(finallines)
 
-        url = f"{config.ERPNEXT_URL}/api/resource/ZK User/{pin}"
+        url = frappe.utils.get_url(f"/api/resource/ZK User/{pin}")
         headers = utils.get_headers()
 
         """
@@ -878,7 +880,7 @@ def update_sync_terminal(pin, serial_number):
         
         
 def delete_user(pin):
-    url = f"{config.ERPNEXT_URL}/api/method/thai_zkt.api.delete_user"
+    url = frappe.utils.get_url("/api/method/thai_zkt.api.delete_user")
     headers = utils.get_headers()
     data = {
         "pin":pin
@@ -907,12 +909,45 @@ def save_attendance(serial_number, logs, event):
     print("event:",event)
     print("logs:",logs)
 
-    if event == "0":
-        erpnext_status_code, erpnext_message = get_terminal(serial_number)
+    # if event == "0":
+    erpnext_status_code, erpnext_message = get_terminal(serial_number)
+    if erpnext_status_code == 200:
+        terminal = erpnext_message
+        device_id = terminal["alias"]
+        print("Alias:",device_id)
+    else:
+        print("\t".join([str(erpnext_status_code), str(device_attendance_log['uid']),
+            str(device_attendance_log['user_id']), str(device_attendance_log['timestamp'].timestamp()),
+            str(device_attendance_log['punch']), str(device_attendance_log['status']),
+            json.dumps(device_attendance_log, default=str)]))
+        attendance_failed_logger.error("\t".join([str(erpnext_status_code), str(device_attendance_log['uid']),
+            str(device_attendance_log['user_id']), str(device_attendance_log['timestamp'].timestamp()),
+            str(device_attendance_log['punch']), str(device_attendance_log['status']),
+            json.dumps(device_attendance_log, default=str)]))
+        if not(any(error in erpnext_message for error in allowlisted_errors)):
+            raise Exception('API Call to ERPNext Failed.')
+
+    print("before setup log")
+    attendance_success_log_file = '_'.join(["attendance_success_log", device_id])
+    attendance_failed_log_file = '_'.join(["attendance_failed_log", device_id])
+    attendance_success_logger = setup_logger(attendance_success_log_file, '/'.join([frappe.conf.zkt_log_dir, attendance_success_log_file])+'.log')
+    attendance_failed_logger = setup_logger(attendance_failed_log_file, '/'.join([frappe.conf.zkt_log_dir, attendance_failed_log_file])+'.log')
+    print("after setup log")
+
+    for device_attendance_log in logs:
+        print("attendance:",device_attendance_log)
+        punch_direction = None
+        erpnext_status_code, erpnext_message = create_attendance(device_attendance_log['user_id'], device_attendance_log['timestamp'], device_id, punch_direction)
         if erpnext_status_code == 200:
-            terminal = erpnext_message
-            device_id = terminal["alias"]
-            print("Alias:",device_id)
+            print("\t".join([erpnext_message, str(device_attendance_log['uid']),
+                str(device_attendance_log['user_id']), str(device_attendance_log['timestamp'].timestamp()),
+                str(device_attendance_log['punch']), str(device_attendance_log['status']),
+                json.dumps(device_attendance_log, default=str)]))
+            attendance_success_logger.info("\t".join([erpnext_message, str(device_attendance_log['uid']),
+                str(device_attendance_log['user_id']), str(device_attendance_log['timestamp'].timestamp()),
+                str(device_attendance_log['punch']), str(device_attendance_log['status']),
+                json.dumps(device_attendance_log, default=str)]))
+
         else:
             print("\t".join([str(erpnext_status_code), str(device_attendance_log['uid']),
                 str(device_attendance_log['user_id']), str(device_attendance_log['timestamp'].timestamp()),
@@ -924,39 +959,6 @@ def save_attendance(serial_number, logs, event):
                 json.dumps(device_attendance_log, default=str)]))
             if not(any(error in erpnext_message for error in allowlisted_errors)):
                 raise Exception('API Call to ERPNext Failed.')
-
-        print("before setup log")
-        attendance_success_log_file = '_'.join(["attendance_success_log", device_id])
-        attendance_failed_log_file = '_'.join(["attendance_failed_log", device_id])
-        attendance_success_logger = setup_logger(attendance_success_log_file, '/'.join([config.LOGS_DIRECTORY, attendance_success_log_file])+'.log')
-        attendance_failed_logger = setup_logger(attendance_failed_log_file, '/'.join([config.LOGS_DIRECTORY, attendance_failed_log_file])+'.log')
-        print("after setup log")
-
-        for device_attendance_log in logs:
-            print("attendance:",device_attendance_log)
-            punch_direction = None
-            erpnext_status_code, erpnext_message = create_attendance(device_attendance_log['user_id'], device_attendance_log['timestamp'], device_id, punch_direction)
-            if erpnext_status_code == 200:
-                print("\t".join([erpnext_message, str(device_attendance_log['uid']),
-                    str(device_attendance_log['user_id']), str(device_attendance_log['timestamp'].timestamp()),
-                    str(device_attendance_log['punch']), str(device_attendance_log['status']),
-                    json.dumps(device_attendance_log, default=str)]))
-                attendance_success_logger.info("\t".join([erpnext_message, str(device_attendance_log['uid']),
-                    str(device_attendance_log['user_id']), str(device_attendance_log['timestamp'].timestamp()),
-                    str(device_attendance_log['punch']), str(device_attendance_log['status']),
-                    json.dumps(device_attendance_log, default=str)]))
-
-            else:
-                print("\t".join([str(erpnext_status_code), str(device_attendance_log['uid']),
-                    str(device_attendance_log['user_id']), str(device_attendance_log['timestamp'].timestamp()),
-                    str(device_attendance_log['punch']), str(device_attendance_log['status']),
-                    json.dumps(device_attendance_log, default=str)]))
-                attendance_failed_logger.error("\t".join([str(erpnext_status_code), str(device_attendance_log['uid']),
-                    str(device_attendance_log['user_id']), str(device_attendance_log['timestamp'].timestamp()),
-                    str(device_attendance_log['punch']), str(device_attendance_log['status']),
-                    json.dumps(device_attendance_log, default=str)]))
-                if not(any(error in erpnext_message for error in allowlisted_errors)):
-                    raise Exception('API Call to ERPNext Failed.')
 
 
 

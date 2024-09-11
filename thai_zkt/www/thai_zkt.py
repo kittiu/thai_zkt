@@ -3,6 +3,8 @@ import frappe
 no_cache = 1
 
 
+# kittiu: Used for testing?
+
 def get_context(context):
 	csrf_token = frappe.sessions.get_csrf_token()
 	frappe.db.commit()  # nosempgrep

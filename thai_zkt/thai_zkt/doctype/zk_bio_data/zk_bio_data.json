@@ -10,10 +10,12 @@
   "type",
   "no",
   "index",
+  "column_break_xwyx",
   "valid",
   "format",
   "major_version",
   "minor_version",
+  "column_break_osop",
   "template"
  ],
  "fields": [
@@ -70,11 +72,19 @@
    "fieldtype": "Long Text",
    "label": "Template",
    "reqd": 1
+  },
+  {
+   "fieldname": "column_break_xwyx",
+   "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "column_break_osop",
+   "fieldtype": "Column Break"
   }
  ],
  "index_web_pages_for_search": 1,
  "links": [],
- "modified": "2024-07-27 13:47:12.535993",
+ "modified": "2024-09-01 17:09:29.187638",
  "modified_by": "Administrator",
  "module": "Thai ZKT",
  "name": "ZK Bio Data",
@@ -89,7 +99,7 @@
    "print": 1,
    "read": 1,
    "report": 1,
-   "role": "System Manager",
+   "role": "ZK Device Manager",
    "share": 1,
    "write": 1
   }

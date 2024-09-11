@@ -6,6 +6,8 @@ import thai_zkt.www.iclock.push_protocol_3 as push3
 
 no_cache = 1
 
+# kittiu: This is just the test?
+
 def get_context(context):
 	csrf_token = frappe.sessions.get_csrf_token()
 	frappe.db.commit()  # nosempgrep

@@ -1,6 +1,6 @@
 import datetime
 import json
-import thai_zkt.www.iclock.local_config as config
+import frappe
 
 def get_arg(args,key,index=0,default=""):
     return args.get(key)[index] if args.get(key) else default
@@ -32,6 +32,6 @@ def get_headers():
     Required HTTP Header for calling ERPNext API
     """
     return {
-        'Authorization': "token "+ config.ERPNEXT_API_KEY + ":" + config.ERPNEXT_API_SECRET,
+        'Authorization': f"token {frappe.conf.zkt_api_key}:{frappe.conf.zkt_api_secret}",
         'Accept': 'application/json'
     }
