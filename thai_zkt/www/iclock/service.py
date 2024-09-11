@@ -35,7 +35,7 @@ def update_command_list_status(cmd_id_list, status):
         "status":status
     }
 
-    response = requests.request("POST", url, headers=headers, json=data)
+    response = requests.request("POST", url, headers=headers, json=data, verify=False)
     if response.status_code == 200:
         return 200, "OK"
     else:
@@ -65,7 +65,7 @@ def update_command_status(cmd_id, status):
 
     print("data:",data)
 
-    response = requests.request("PUT", url, headers=headers, json=data)
+    response = requests.request("PUT", url, headers=headers, json=data, verify=False)
     if response.status_code == 200:
         return 200, json.loads(response._content)['data']['name']
     else:
@@ -87,7 +87,7 @@ def update_command_after_done(cmd_id, value):
 
     print("data:",data)
 
-    response = requests.request("PUT", url, headers=headers, json=data)
+    response = requests.request("PUT", url, headers=headers, json=data, verify=False)
     if response.status_code == 200:
         return 200, json.loads(response._content)['data']['name']
     else:
@@ -164,7 +164,7 @@ def save_terminal(serial_number, info):
     if info.get('FPCount') != None:
         data['fingerprint_count'] = int(info['FPCount'])
 
-    response = requests.request("PUT", url, headers=headers, json=data)
+    response = requests.request("PUT", url, headers=headers, json=data, verify=False)
     if response.status_code == 200:
         return 200, json.loads(response._content)['data']['name']
     else:
@@ -186,7 +186,7 @@ def create_attendance(employee_field_value, timestamp, device_id=None, log_type=
         'device_id' : device_id,
 		'log_type' : log_type
     }
-    response = requests.request("POST", url, headers=headers, json=data)
+    response = requests.request("POST", url, headers=headers, json=data, verify=False)
     if response.status_code == 200:
         return 200, json.loads(response._content)['message']['name']
     else:
@@ -201,7 +201,7 @@ def get_terminal(serial_number):
     """
     url = frappe.utils.get_url(f"/api/resource/ZK Terminal/{serial_number}")
     headers = utils.get_headers()
-    response = requests.request("GET", url, headers=headers)
+    response = requests.request("GET", url, headers=headers, verify=False)
     print("response:",response)
     if response.status_code == 200:
         return 200, json.loads(response._content)['data']
@@ -218,7 +218,7 @@ def get_command(id):
     url = frappe.utils.get_url(f"/api/resource/ZK Command/{id}")
     headers = utils.get_headers()
     
-    response = requests.request("GET", url, headers=headers)
+    response = requests.request("GET", url, headers=headers, verify=False)
     if response.status_code == 200:
         return 200, json.loads(response._content)['data']
     else:
@@ -255,7 +255,7 @@ def update_terminal_last_activity(serial_number):
         'last_activity' : now.__str__()
 	}
 
-    response = requests.request("PUT", url, headers=headers, json=data)
+    response = requests.request("PUT", url, headers=headers, json=data, verify=False)
     if response.status_code == 200:
         return 200, json.loads(response._content)['data']['name']
     else:
@@ -270,7 +270,7 @@ def update_terminal_last_activity(serial_number):
 #     filters = f'or_filters=[["{field}","=","{pin}"],["{field}","=","{user_name}"]]'
 #     url = frappe.utils.get_url(f'/api/resource/Employee?{fields}&{filters}')
 #     headers = utils.get_headers()
-#     response = requests.request("GET", url=url, headers=headers)
+#     response = requests.request("GET", url=url, headers=headers, verify=False)
 #     if response.status_code == 200:
 #         employees = json.loads(response._content)['data']
 #         for employee in employees:
@@ -294,7 +294,7 @@ def update_terminal_last_activity(serial_number):
 #         'attendance_device_id' : str(pin)
 # 	}
 
-#     response = requests.request("PUT", url, headers=headers, json=data)
+#     response = requests.request("PUT", url, headers=headers, json=data, verify=False)
 #     if response.status_code == 200:
 #         return 200, json.loads(response._content)['data']['name']
 #     else:
@@ -336,7 +336,7 @@ def update_user(user_id, user_name, user_pri, user_password, user_grp):
         'sync_terminal' : ''
 	}
     
-    response = requests.request("PUT", url, headers=headers, json=data)
+    response = requests.request("PUT", url, headers=headers, json=data, verify=False)
     if response.status_code == 200:
         return 200, json.loads(response._content)['data']['id']
     else:
@@ -361,7 +361,7 @@ def create_user(user_id, user_name, user_pri, user_password, user_grp):
         'main_status' : 'Add'
 	}
     
-    response = requests.request("POST", url, headers=headers, json=data)
+    response = requests.request("POST", url, headers=headers, json=data, verify=False)
     if response.status_code == 200:
         return 200, json.loads(response._content)['data']['id']
     else:
@@ -382,7 +382,7 @@ def update_user_main_status(zk_user):
         'sync_terminal' : ''
 	}
     
-    response = requests.request("PUT", url, headers=headers, json=data)
+    response = requests.request("PUT", url, headers=headers, json=data, verify=False)
     if response.status_code == 200:
         return 200, json.loads(response._content)['data']['id']
     else:
@@ -431,7 +431,7 @@ def update_bio_data(name, zk_user, type, no, index, valid, format, major_version
         'template' : template
 	}
     
-    response = requests.request("PUT", url, headers=headers, json=data)
+    response = requests.request("PUT", url, headers=headers, json=data, verify=False)
     if response.status_code == 200:
         return 200, json.loads(response._content)['data']['name']
     else:
@@ -459,7 +459,7 @@ def create_bio_data(zk_user, type, no, index, valid, format, major_version, mino
         'template' : template
 	}
     
-    response = requests.request("POST", url, headers=headers, json=data)
+    response = requests.request("POST", url, headers=headers, json=data, verify=False)
     if response.status_code == 200:
         return 200, json.loads(response._content)['data']['name']
     else:
@@ -506,7 +506,7 @@ def update_bio_photo(name, zk_user, type, no, index, file_name, size, content):
         'content' : content
 	}
     
-    response = requests.request("PUT", url, headers=headers, json=data)
+    response = requests.request("PUT", url, headers=headers, json=data, verify=False)
     if response.status_code == 200:
         return 200, json.loads(response._content)['data']['name']
     else:
@@ -532,7 +532,7 @@ def create_bio_photo(zk_user, type, no, index, file_name, size, content):
         'content' : content
 	}
     
-    response = requests.request("POST", url, headers=headers, json=data)
+    response = requests.request("POST", url, headers=headers, json=data, verify=False)
     if response.status_code == 200:
         return 200, json.loads(response._content)['data']['name']
     else:
@@ -549,7 +549,7 @@ def list_user(search_term=None):
     url = frappe.utils.get_url(f'/api/resource/ZK User?{fields}&limit_start=0&limit=500')
     headers = utils.get_headers()
     
-    response = requests.request("GET", url=url, headers=headers)
+    response = requests.request("GET", url=url, headers=headers, verify=False)
     if response.status_code == 200:
         return 200, json.loads(response._content)['data']
     else:
@@ -566,7 +566,7 @@ def list_biodata(user_id):
     url = frappe.utils.get_url(f'/api/resource/ZK Bio Data?{fields}&{filters}')
     headers = utils.get_headers()
     
-    response = requests.request("GET", url=url, headers=headers)
+    response = requests.request("GET", url=url, headers=headers, verify=False)
     if response.status_code == 200:
         return 200, json.loads(response._content)['data']
     else:
@@ -584,7 +584,7 @@ def list_biophoto(user_id):
     url = frappe.utils.get_url(f'/api/resource/ZK Bio Photo?{fields}&{filters}')
     headers = utils.get_headers()
     
-    response = requests.request("GET", url=url, headers=headers)
+    response = requests.request("GET", url=url, headers=headers, verify=False)
     if response.status_code == 200:
         return 200, json.loads(response._content)['data']
     else:
@@ -600,7 +600,7 @@ def get_user(name):
     url = frappe.utils.get_url(f'/api/resource/ZK User/{name}')
     headers = utils.get_headers()
     
-    response = requests.request("GET", url, headers=headers)
+    response = requests.request("GET", url, headers=headers, verify=False)
     if response.status_code == 200:
         return 200, json.loads(response._content)['data']
     else:
@@ -619,7 +619,7 @@ def get_bio_data(zk_user, type, no, index):
     url = frappe.utils.get_url(f'/api/resource/ZK Bio Data?{fields}&{filters}')
     headers = utils.get_headers()
     
-    response = requests.request("GET", url, headers=headers)
+    response = requests.request("GET", url, headers=headers, verify=False)
     if response.status_code == 200:
         return 200, json.loads(response._content)['data']
     else:
@@ -637,7 +637,7 @@ def get_bio_photo(zk_user, type, no, index):
     url = frappe.utils.get_url(f'/api/resource/ZK Bio Photo?{fields}&{filters}')
     headers = utils.get_headers()
     
-    response = requests.request("GET", url, headers=headers)
+    response = requests.request("GET", url, headers=headers, verify=False)
     if response.status_code == 200:
         return 200, json.loads(response._content)['data']
     else:
@@ -663,7 +663,7 @@ def create_command(terminal, command, status, after_done=""):
     if after_done:
         data["after_done"] = after_done
     
-    response = requests.request("POST", url, headers=headers, json=data)
+    response = requests.request("POST", url, headers=headers, json=data, verify=False)
     if response.status_code == 200:
         return 200, str(json.loads(response._content)['data']['name'])
     else:
@@ -754,7 +754,7 @@ def do_set_terminal_options(serial_number, options):
 
     print("data:",data)
 
-    response = requests.request("PUT", url, headers=headers, json=data)
+    response = requests.request("PUT", url, headers=headers, json=data, verify=False)
     if response.status_code == 200:
         return 200, json.loads(response._content)['data']['serial_number']
     else:
@@ -780,7 +780,7 @@ def get_push_protocol(serial_number):
 def get_terminal_count():
     url = frappe.utils.get_url("/api/method/thai_zkt.api.count_terminal")
     headers = utils.get_headers()
-    response = requests.request("GET", url, headers=headers)
+    response = requests.request("GET", url, headers=headers, verify=False)
     if response.status_code == 200:
         return 200, int(json.loads(response.content)['message'])
     else:
@@ -795,7 +795,7 @@ def get_user_count(serial_number):
     data = {
         'serial_number': serial_number
     }
-    response = requests.request("GET", url, headers=headers, json=data)
+    response = requests.request("GET", url, headers=headers, json=data, verify=False)
     print("response.status_code:",response.status_code)
     if response.status_code == 200:
         data = json.loads(response.content)['message']
@@ -853,7 +853,7 @@ def update_sync_terminal(pin, serial_number):
                 
                 print("data:",data)
                 
-                response = requests.request("PUT", url, headers=headers, json=data)
+                response = requests.request("PUT", url, headers=headers, json=data, verify=False)
                 if response.status_code == 200:
                     return 200, json.loads(response._content)['data']['name']
                 else:
@@ -870,7 +870,7 @@ def update_sync_terminal(pin, serial_number):
 
                 return 200, "OK"
         else:
-            response = requests.request("PUT", url, headers=headers, json=data)
+            response = requests.request("PUT", url, headers=headers, json=data, verify=False)
             if response.status_code == 200:
                 return 200, json.loads(response._content)['data']['name']
             else:
@@ -885,7 +885,7 @@ def delete_user(pin):
     data = {
         "pin":pin
     }
-    response = requests.request("DELETE", url, headers=headers, json=data)
+    response = requests.request("DELETE", url, headers=headers, json=data, verify=False)
     if response.status_code == 200:
         return 200, response.content
     else:
