@@ -34,7 +34,8 @@
   {
    "fieldname": "password",
    "fieldtype": "Data",
-   "label": "Password"
+   "label": "Password",
+   "reqd": 1
   },
   {
    "default": "0",
@@ -71,7 +72,7 @@
  ],
  "index_web_pages_for_search": 1,
  "links": [],
- "modified": "2024-09-01 15:42:25.758212",
+ "modified": "2024-09-12 10:09:00.411848",
  "modified_by": "Administrator",
  "module": "Thai ZKT",
  "name": "ZK User",

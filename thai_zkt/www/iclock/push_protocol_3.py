@@ -311,18 +311,18 @@ def get_cmd_delete_user(user):
     return 'DATA DELETE user Pin=' + user
 
 def encode_user(user):
-    
-    encode = "\t".join(["Cardno="
-                           ,"Pin=" + str(user["id"])
-                           ,"Password=" + user["password"]
-                           ,"Group=" + user["group"]
-                           ,"Starttime=0"
-                           ,"Endtime=0"
-                           ,"Name=" + user["user_name"]
-                           ,"Privilege=" + user["privilege"]
-                           ,"Disable=0"
-                           ,"Verify=0"
-                           ])
+    encode = "\t".join([
+        "Cardno=",
+        "Pin=" + str(user["id"]),
+        "Password=" + user["password"],
+        "Group=" + user["group"],
+        "Starttime=0",
+        "Endtime=0",
+        "Name=" + user.get("user_name", ""),
+        "Privilege=" + user["privilege"],
+        "Disable=0",
+        "Verify=0"
+    ])
     return encode
 
 def encode_biodata(biodata):
